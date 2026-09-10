@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 import { sql } from "@/lib/backoffice-db"
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const body = await request.json()
     const { nombre, imagen, visible } = body
-    const { id } = params
+    const { id } = await params
 
     if (!nombre || nombre.trim() === "") {
       return NextResponse.json({ error: "El nombre es obligatorio" }, { status: 400 })
@@ -39,9 +39,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const result = await sql`
       DELETE FROM categorias 

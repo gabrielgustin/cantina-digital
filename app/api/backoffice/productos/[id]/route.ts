@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 import { sql } from "@/lib/backoffice-db"
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const body = await request.json()
     const { nombre, descripcion, precio, imagen, categoria, visible, subcategoria, descuento } = body
-    const { id } = params
+    const { id } = await params
 
     console.log("[v0] Updating product with ID:", id)
     console.log("[v0] Update data:", body)
@@ -54,9 +54,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params
+    const { id } = await params
 
     console.log("[v0] Deleting product with ID:", id)
 

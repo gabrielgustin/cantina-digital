@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
-
-const sql = neon(process.env.NEON_NEON_NEON_DATABASE_URL!)
+import { sql } from "@/lib/backoffice-db"
 
 export async function GET() {
   try {

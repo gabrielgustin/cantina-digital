@@ -7,7 +7,7 @@ import FloatingWindow from "@/components/backoffice/floating-window"
 
 export function PreviewButton() {
   const [isWindowOpen, setIsWindowOpen] = useState(false)
-  const storePreviewUrl = "https://mymrelojes.vercel.app"
+  const storePreviewUrl = "/"
 
   return (
     <>
