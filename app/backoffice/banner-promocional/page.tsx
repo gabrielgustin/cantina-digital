@@ -164,7 +164,7 @@ export default function BannerPromocionalPage() {
                       <div className="bg-white rounded-lg overflow-hidden shadow-lg">
                         
                         <iframe
-                          src="https://mymrelojes.vercel.app/"
+                          src="/"
                           className="w-full h-[600px] border-0"
                           title="Vista previa de la aplicación"
                         />
