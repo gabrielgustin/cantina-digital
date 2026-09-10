@@ -1,0 +1,502 @@
+"use client"
+
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { Home, Grid3X3, Briefcase, Plus, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { useStore, type Categoria } from "@/contexts/store-context"
+import { useToast } from "@/hooks/use-toast"
+import PreviewButton from "@/components/backoffice/preview-button"
+
+export default function CategoriasPage() {
+  const { categorias, productos, refetchCategorias, loading } = useStore()
+  const { toast } = useToast()
+  const [isOpen, setIsOpen] = useState(false)
+  const [nuevaCategoria, setNuevaCategoria] = useState<Omit<Categoria, "id">>({
+    nombre: "",
+    visible: true,
+    imagen: "/placeholder.svg?height=400&width=400",
+  })
+  const [isWindowOpen, setIsWindowOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [modoEdicion, setModoEdicion] = useState(false)
+  const [categoriaEditando, setCategoriaEditando] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [subcategorias, setSubcategorias] = useState<Array<{ id: string; nombre: string; categoria_id: string }>>([])
+  const [nuevaSubcategoria, setNuevaSubcategoria] = useState("")
+  const [loadingSubcategorias, setLoadingSubcategorias] = useState(false)
+
+  const cargarSubcategorias = async (categoriaId: string) => {
+    setLoadingSubcategorias(true)
+    try {
+      const response = await fetch(`/api/backoffice/subcategorias?categoria_id=${categoriaId}`)
+      if (!response.ok) throw new Error("Error al cargar subcategorías")
+      const data = await response.json()
+      setSubcategorias(data)
+    } catch (error) {
+      console.error("[v0] Error loading subcategorias:", error)
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las subcategorías",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingSubcategorias(false)
+    }
+  }
+
+  const agregarSubcategoria = async () => {
+    if (!categoriaEditando || nuevaSubcategoria.trim() === "") {
+      toast({
+        title: "Error",
+        description: "El nombre de la subcategoría es obligatorio",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      const response = await fetch("/api/backoffice/subcategorias", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: nuevaSubcategoria,
+          categoria_id: categoriaEditando,
+        }),
+      })
+
+      if (!response.ok) throw new Error("Error al crear subcategoría")
+
+      await cargarSubcategorias(categoriaEditando)
+      setNuevaSubcategoria("")
+
+      toast({
+        title: "Subcategoría agregada",
+        description: "La subcategoría ha sido agregada correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo agregar la subcategoría",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const eliminarSubcategoria = async (subcategoriaId: string) => {
+    if (!categoriaEditando) return
+
+    try {
+      const response = await fetch(`/api/backoffice/subcategorias?id=${subcategoriaId}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) throw new Error("Error al eliminar subcategoría")
+
+      await cargarSubcategorias(categoriaEditando)
+
+      toast({
+        title: "Subcategoría eliminada",
+        description: "La subcategoría ha sido eliminada correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la subcategoría",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const getSubcategoriasCountPorCategoria = (categoriaId: string) => {
+    const productosDeCategoria = productos.filter((p) => p.categoria === categoriaId)
+    const subcategoriasUnicas = new Set(
+      productosDeCategoria.map((p) => p.subcategoria).filter((s) => s && s.trim() !== ""),
+    )
+    return subcategoriasUnicas.size
+  }
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && menuOpen) {
+        setMenuOpen(false)
+      }
+    }
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [menuOpen])
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Error",
+        description: "Por favor selecciona un archivo de imagen válido",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "La imagen no debe superar los 5MB",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setUploadingImage(true)
+    try {
+      console.log("[v0] Attempting to upload image:", file.name, file.type)
+
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await fetch("/api/backoffice/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      console.log("[v0] Upload response status:", response.status)
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error("[v0] Upload failed with error:", errorData)
+        throw new Error(errorData.error || "Error al subir la imagen")
+      }
+
+      const data = await response.json()
+      console.log("[v0] Upload successful, received data:", data)
+
+      if (!data.url) {
+        throw new Error("No se recibió la URL de la imagen")
+      }
+
+      setNuevaCategoria({ ...nuevaCategoria, imagen: data.url })
+
+      toast({
+        title: "Imagen cargada",
+        description: `La imagen ha sido cargada correctamente. Reducción: ${data.reduction || "N/A"}`,
+      })
+    } catch (error) {
+      console.error("[v0] Error uploading image:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "No se pudo cargar la imagen",
+        variant: "destructive",
+      })
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  const agregarCategoria = async () => {
+    if (nuevaCategoria.nombre.trim() === "") {
+      toast({
+        title: "Error",
+        description: "El nombre de la categoría es obligatorio",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSaving(true)
+    try {
+      const response = await fetch("/api/backoffice/categorias", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevaCategoria),
+      })
+
+      if (!response.ok) {
+        throw new Error("Error al crear categoría")
+      }
+
+      await refetchCategorias()
+      setNuevaCategoria({
+        nombre: "",
+        visible: true,
+        imagen: "/placeholder.svg?height=400&width=400",
+      })
+      setIsOpen(false)
+
+      toast({
+        title: "Categoría agregada",
+        description: "La categoría ha sido agregada correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo agregar la categoría",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const editarCategoria = (id: string) => {
+    const categoria = categorias.find((cat) => cat.id === id)
+    if (categoria) {
+      setNuevaCategoria({
+        nombre: categoria.nombre,
+        visible: categoria.visible,
+        imagen: categoria.imagen,
+      })
+      setCategoriaEditando(id)
+      setModoEdicion(true)
+      setIsOpen(true)
+      cargarSubcategorias(id)
+    }
+  }
+
+  const guardarEdicion = async () => {
+    if (!categoriaEditando) return
+
+    if (nuevaCategoria.nombre.trim() === "") {
+      toast({
+        title: "Error",
+        description: "El nombre de la categoría es obligatorio",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSaving(true)
+    try {
+      const response = await fetch(`/api/backoffice/categorias/${categoriaEditando}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevaCategoria),
+      })
+
+      if (!response.ok) {
+        throw new Error("Error al actualizar categoría")
+      }
+
+      await refetchCategorias()
+      setNuevaCategoria({
+        nombre: "",
+        visible: true,
+        imagen: "/placeholder.svg?height=400&width=400",
+      })
+      setModoEdicion(false)
+      setCategoriaEditando(null)
+      setIsOpen(false)
+      setSubcategorias([])
+
+      toast({
+        title: "Categoría actualizada",
+        description: "La categoría ha sido actualizada correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la categoría",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const eliminarCategoria = async () => {
+    if (!categoriaEditando) return
+
+    setSaving(true)
+    try {
+      const response = await fetch(`/api/backoffice/categorias/${categoriaEditando}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar categoría")
+      }
+
+      await refetchCategorias()
+      setIsOpen(false)
+      setModoEdicion(false)
+      setCategoriaEditando(null)
+      setSubcategorias([])
+
+      toast({
+        title: "Categoría eliminada",
+        description: "La categoría ha sido eliminada correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la categoría",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      <header className="bg-[#1e4b8e] text-white relative">
+        <button
+          className="md:hidden absolute top-1/2 -translate-y-1/2 left-4 z-40 bg-[#1e4b8e] text-white p-3 rounded-md flex flex-col gap-1.5 items-start"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Abrir menú de navegación"
+        >
+          <span
+            className={`block h-0.5 w-6 bg-white transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2 w-6" : ""}`}
+          ></span>
+          <span
+            className={`block h-0.5 w-5 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
+          ></span>
+          <span
+            className={`block h-0.5 w-4 bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2 w-6" : ""}`}
+          ></span>
+        </button>
+        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0 border-b border-gray-100">
+          <div className="w-full sm:w-auto flex justify-end sm:justify-start">
+            <Image
+              src="/images/logoautogestiva.png"
+              alt="Autogestiva"
+              width={500}
+              height={100}
+              className="h-14 sm:h-20 w-auto"
+              priority
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <PreviewButton />
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 flex flex-col md:flex-row gap-4 sm:gap-6 pr-4 pt-0">
+        <div className="w-full md:w-[250px] lg:w-[300px]">
+          {menuOpen && <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setMenuOpen(false)} />}
+
+          <div
+            className={`${
+              menuOpen ? "translate-x-0" : "-translate-x-full"
+            } md:translate-x-0 fixed md:relative top-0 left-0 w-[280px] md:w-auto h-full md:h-auto bg-[#1e4b8e] text-white p-6 rounded-none md:rounded-lg z-50 md:z-0 transition-transform duration-300 ease-in-out`}
+          >
+            <button
+              className="md:hidden absolute top-4 right-4 text-white"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Cerrar menú"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            <h3 className="text-lg font-medium mb-6 mt-2 md:mt-0">Navegación</h3>
+
+            <div className="space-y-4">
+              <Link href="/backoffice" className="flex items-center hover:underline" onClick={() => setMenuOpen(false)}>
+                <Home className="h-5 w-5 mr-4" />
+                Inicio
+              </Link>
+
+              <Link
+                href="/backoffice/categorias"
+                className="flex items-center hover:underline font-semibold"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Grid3X3 className="h-5 w-5 mr-4" />
+                Categorías
+              </Link>
+
+              <Link href="/backoffice/productos" className="flex items-center hover:underline" onClick={() => setMenuOpen(false)}>
+                <Briefcase className="h-5 w-5 mr-4" />
+                Productos
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Categorías</h1>
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#1e4b8e] hover:bg-transparent hover:text-[#163a70] bg-transparent"
+              onClick={() => setIsOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              Agregar categoría
+            </Button>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-gray-500">Cargando categorías...</div>
+            </div>
+          ) : categorias.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 sm:py-20">
+              <h2 className="text-lg sm:text-xl font-medium text-gray-700 mb-2 text-center px-4">Sin categorías</h2>
+              <p className="text-sm sm:text-base text-gray-500 mb-8 text-center px-4">
+                Haz clic en "Agregar categoría" para comenzar
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {categorias.map((categoria) => {
+                const subcategoriasCount = getSubcategoriasCountPorCategoria(categoria.id.toString())
+
+                return (
+                  <Card
+                    key={categoria.id}
+                    className="overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow transition-shadow"
+                    onClick={() => editarCategoria(categoria.id.toString())}
+                  >
+                    <div className="relative h-40 sm:h-48 overflow-hidden bg-gray-100">
+                      <Image
+                        src={categoria.imagen || "/placeholder.svg?height=400&width=400"}
+                        alt={categoria.nombre}
+                        fill
+                        className="object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.src =
+                            "/placeholder.svg?height=400&width=400&query=" + encodeURIComponent(categoria.nombre)
+                        }}
+                      />
+                    </div>
+                    <div className="p-3 sm:p-4">
+                      <h3 className="font-medium text-base sm:text-lg text-gray-800">{categoria.nombre}</h3>
+                      {subcategoriasCount > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {subcategoriasCount} subcategoría{subcategoriasCount !== 1 ? "s" : ""}
+                        </p>
+                      )}
+                      <div className="mt-2">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            categoria.visible ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {categoria.visible ? "Visible" : "No visible"}
+                        </span>
+                      </div>
+                    </div>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
