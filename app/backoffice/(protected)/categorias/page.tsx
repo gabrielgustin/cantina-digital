@@ -5,9 +5,13 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Home, Grid3X3, Briefcase, Plus, X } from "lucide-react"
+import { Home, Grid3X3, Briefcase, Plus, X, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { useStore, type Categoria } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
 import PreviewButton from "@/components/backoffice/preview-button"
@@ -428,14 +432,179 @@ export default function CategoriasPage() {
         <div className="flex-1">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Categorías</h1>
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#1e4b8e] hover:bg-transparent hover:text-[#163a70] bg-transparent"
-              onClick={() => setIsOpen(true)}
+            <Dialog
+              open={isOpen}
+              onOpenChange={(open) => {
+                setIsOpen(open)
+                if (!open) {
+                  setModoEdicion(false)
+                  setCategoriaEditando(null)
+                  setSubcategorias([])
+                  setNuevaSubcategoria("")
+                  setNuevaCategoria({
+                    nombre: "",
+                    visible: true,
+                    imagen: "/placeholder.svg?height=400&width=400",
+                  })
+                }
+              }}
             >
-              <Plus className="h-4 w-4" />
-              Agregar categoría
-            </Button>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#1e4b8e] hover:bg-transparent hover:text-[#163a70] bg-transparent"
+                  onClick={() => {
+                    setModoEdicion(false)
+                    setCategoriaEditando(null)
+                    setIsOpen(true)
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar categoría
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="w-[95vw] max-w-[500px] max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-medium text-gray-800">
+                    {modoEdicion ? "Editar categoría" : "Agregar categoría"}
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="mt-3 space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="nombre-categoria" className="text-sm font-medium text-gray-700">
+                      Nombre
+                    </Label>
+                    <Input
+                      id="nombre-categoria"
+                      placeholder="Ej: Bebidas"
+                      value={nuevaCategoria.nombre}
+                      onChange={(e) => setNuevaCategoria({ ...nuevaCategoria, nombre: e.target.value })}
+                      className="bg-gray-50 border-0 h-10"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium text-gray-700">Imagen</Label>
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border bg-gray-100">
+                        <Image
+                          src={nuevaCategoria.imagen || "/placeholder.svg?height=400&width=400"}
+                          alt="Vista previa"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id="imagen-categoria"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={uploadingImage}
+                          onClick={() => document.getElementById("imagen-categoria")?.click()}
+                        >
+                          {uploadingImage ? "Subiendo..." : "Cambiar imagen"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+                    <span className="text-sm text-gray-700">Visible en la tienda</span>
+                    <Switch
+                      checked={nuevaCategoria.visible}
+                      onCheckedChange={(checked) => setNuevaCategoria({ ...nuevaCategoria, visible: checked })}
+                    />
+                  </div>
+
+                  {modoEdicion && categoriaEditando && (
+                    <div className="space-y-2 border-t border-gray-100 pt-4">
+                      <Label className="text-sm font-medium text-gray-700">Subcategorías</Label>
+                      {loadingSubcategorias ? (
+                        <p className="text-sm text-gray-500">Cargando subcategorías...</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {subcategorias.map((sub) => (
+                            <div
+                              key={sub.id}
+                              className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+                            >
+                              <span className="text-sm text-gray-700">{sub.nombre}</span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-red-500 hover:text-red-600"
+                                onClick={() => eliminarSubcategoria(sub.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                          {subcategorias.length === 0 && (
+                            <p className="text-sm text-gray-500">Todavía no hay subcategorías.</p>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex gap-2 pt-1">
+                        <Input
+                          placeholder="Nueva subcategoría"
+                          value={nuevaSubcategoria}
+                          onChange={(e) => setNuevaSubcategoria(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault()
+                              agregarSubcategoria()
+                            }
+                          }}
+                          className="bg-gray-50 border-0 h-10"
+                        />
+                        <Button type="button" variant="outline" onClick={agregarSubcategoria}>
+                          Agregar
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1 h-10 border-0 bg-gray-50"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        className="flex-1 h-10 bg-[#1e4b8e] hover:bg-[#163a70]"
+                        disabled={saving}
+                        onClick={modoEdicion ? guardarEdicion : agregarCategoria}
+                      >
+                        {saving ? "Guardando..." : modoEdicion ? "Guardar" : "Crear"}
+                      </Button>
+                    </div>
+                    {modoEdicion && (
+                      <Button
+                        variant="ghost"
+                        className="h-10 text-red-500 hover:bg-red-50 hover:text-red-600"
+                        disabled={saving}
+                        onClick={eliminarCategoria}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar categoría
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {loading ? (

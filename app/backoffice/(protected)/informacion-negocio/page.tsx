@@ -250,10 +250,10 @@ export default function InformacionNegocioPage() {
         description: "La información del negocio ha sido guardada correctamente en la base de datos",
       })
 
-      console.log("[v0] Redirecting to home in 1 second...")
+      console.log("[v0] Redirecting to backoffice home in 1 second...")
       setTimeout(() => {
-        console.log("[v0] Executing redirect to /")
-        router.push("/")
+        console.log("[v0] Executing redirect to /backoffice")
+        router.push("/backoffice")
       }, 1000)
     } catch (error) {
       console.error("[v0] Error saving business info:", error)

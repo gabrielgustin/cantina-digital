@@ -85,7 +85,7 @@ export default function BannerPromocionalPage() {
       })
       
       setTimeout(() => {
-        router.push("/")
+        router.push("/backoffice")
       }, 1000)
     } catch (error) {
       console.error("[v0] Error saving banner:", error)

@@ -234,7 +234,7 @@ export default function FormasEntregaPage() {
       toast.success("Formas de entrega guardadas correctamente")
 
       setTimeout(() => {
-        router.push("/")
+        router.push("/backoffice")
       }, 1000)
     } catch (error) {
       console.error("[v0] Error saving delivery methods:", error)

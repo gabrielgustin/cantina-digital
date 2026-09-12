@@ -234,9 +234,9 @@ export default function MetodosPagoPage() {
       console.log("[v0] Payment methods saved successfully")
       toast.success("Métodos de pago guardados correctamente")
 
-      // Redirect to home
+      // Redirect back to the backoffice home
       setTimeout(() => {
-        router.push("/")
+        router.push("/backoffice")
       }, 1000)
     } catch (error) {
       console.error("[v0] Error saving payment methods:", error)
