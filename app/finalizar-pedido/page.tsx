@@ -370,49 +370,51 @@ ${deliveryCost > 0 ? `*Envío: ${formatPrice(deliveryCost)}*` : ""}
           )}
 
           {/* Cupón de descuento */}
-          <div>
-            <label htmlFor="coupon" className="block text-base md:text-lg font-semibold mb-2 product-title-font">
-              Cupón de descuento
-            </label>
-            <div className="flex gap-2 md:gap-3">
-              <input
-                type="text"
-                id="coupon"
-                value={couponCode}
-                onChange={(e) => {
-                  setCouponCode(e.target.value.toUpperCase())
-                  if (appliedCoupon) setAppliedCoupon(null)
-                }}
-                placeholder="Ingrese un código de descuento"
-                className="flex-1 p-3 md:p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tupedido-blue text-smaller uppercase"
-                disabled={validatingCoupon}
-              />
-              <button
-                type="button"
-                onClick={handleValidateCoupon}
-                disabled={validatingCoupon || !couponCode.trim()}
-                className="bg-tupedido-blue text-white font-semibold py-3 px-4 md:py-4 md:px-6 rounded-md hover:opacity-90 transition-opacity text-smaller disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {validatingCoupon ? "..." : "Validar"}
-              </button>
-            </div>
-            {appliedCoupon && (
-              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
-                <span className="text-sm text-green-700 font-medium">✓ Cupón aplicado: {appliedCoupon.code}</span>
+          {siteConfig.enable_coupons === "true" && (
+            <div>
+              <label htmlFor="coupon" className="block text-base md:text-lg font-semibold mb-2 product-title-font">
+                Cupón de descuento
+              </label>
+              <div className="flex gap-2 md:gap-3">
+                <input
+                  type="text"
+                  id="coupon"
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value.toUpperCase())
+                    if (appliedCoupon) setAppliedCoupon(null)
+                  }}
+                  placeholder="Ingrese un código de descuento"
+                  className="flex-1 p-3 md:p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tupedido-blue text-smaller uppercase"
+                  disabled={validatingCoupon}
+                />
                 <button
                   type="button"
-                  onClick={() => {
-                    setAppliedCoupon(null)
-                    setCouponCode("")
-                    toast.info("Cupón removido")
-                  }}
-                  className="text-xs text-green-600 hover:text-green-800 underline"
+                  onClick={handleValidateCoupon}
+                  disabled={validatingCoupon || !couponCode.trim()}
+                  className="bg-tupedido-blue text-white font-semibold py-3 px-4 md:py-4 md:px-6 rounded-md hover:opacity-90 transition-opacity text-smaller disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Remover
+                  {validatingCoupon ? "..." : "Validar"}
                 </button>
               </div>
-            )}
-          </div>
+              {appliedCoupon && (
+                <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md flex items-center justify-between">
+                  <span className="text-sm text-green-700 font-medium">✓ Cupón aplicado: {appliedCoupon.code}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAppliedCoupon(null)
+                      setCouponCode("")
+                      toast.info("Cupón removido")
+                    }}
+                    className="text-xs text-green-600 hover:text-green-800 underline"
+                  >
+                    Remover
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </form>
       </main>
 

@@ -52,10 +52,7 @@ export default function CuponesDescuentoPage() {
         const configResponse = await fetch("/api/backoffice/site-config")
         if (configResponse.ok) {
           const configResult = await configResponse.json()
-          if (configResult.success && configResult.data) {
-            const enableCouponsConfig = configResult.data.find((item: any) => item.key === "enable_coupons")
-            setHabilitarCupones(enableCouponsConfig?.value === "true")
-          }
+          setHabilitarCupones(configResult.enable_coupons === "true")
         }
 
         // Fetch coupons
