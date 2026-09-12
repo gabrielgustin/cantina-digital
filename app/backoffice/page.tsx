@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image"
 import Link from "next/link"
-import { Grid3X3, Briefcase, Info, Clock, CreditCard, Ticket, QrCode, Package, ExternalLink } from "lucide-react"
+import { ArrowLeft, Grid3X3, Briefcase, Info, Clock, CreditCard, Ticket, QrCode, Package, ExternalLink } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import PreviewButton from "@/components/backoffice/preview-button"
 import { SignOutButton } from "@/components/backoffice/sign-out-button"
@@ -22,7 +22,14 @@ export default function BackofficeHome() {
               priority
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-md border border-white/70 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              <span>Volver a la app</span>
+            </Link>
             <PreviewButton />
             <SignOutButton />
           </div>
