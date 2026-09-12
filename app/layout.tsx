@@ -16,7 +16,7 @@ const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans" })
 export const revalidate = 0
 
 export const metadata: Metadata = {
-  title: "M&M Relojes",
+  title: "Autogestiva Cantina Digital",
   description: "Tu tienda de relojes y accesorios",
   generator: "v0.app",
 }

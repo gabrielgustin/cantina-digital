@@ -11,7 +11,7 @@ export default function BackofficeHome() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-[#1e4b8e] text-white">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <div>
             <Image
               src="/images/logoautogestiva.png"
@@ -142,14 +142,6 @@ export default function BackofficeHome() {
 
         {/* Sidebar */}
         <div className="w-full lg:w-[350px]">
-          {/* Mi suscripción */}
-          <div className="bg-white p-4 rounded-lg shadow-sm mb-6 border-0">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-800">Mi suscripción</h3>
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">ACTIVA</span>
-            </div>
-          </div>
-
           {/* Conoce más sobre Autogestiva */}
           <div className="bg-[#1e4b8e] text-white p-6 rounded-lg">
             <h3 className="text-lg font-medium mb-6 flex items-center">Conoce más sobre Autogestiva</h3>
