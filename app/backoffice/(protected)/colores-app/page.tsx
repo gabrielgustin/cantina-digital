@@ -98,7 +98,7 @@ export default function ColoresAppPage() {
         })
 
         setTimeout(() => {
-          router.push("/")
+          router.push("/backoffice")
         }, 1500)
       } else {
         throw new Error("Error al guardar colores")

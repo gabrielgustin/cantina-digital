@@ -8,6 +8,12 @@ import Link from "next/link"
 import { Home, Grid3X3, Briefcase, Plus, Trash2, X, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 import { useStore, type Producto } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
 import { PreviewButton } from "@/components/backoffice/preview-button"
@@ -223,6 +229,40 @@ export default function ProductosPage() {
         description: "No se pudo eliminar el producto",
         variant: "destructive",
       })
+    }
+  }
+
+  const eliminarProductoDesdeDialogo = async () => {
+    if (!productoEditando) return
+
+    setSaving(true)
+    try {
+      const response = await fetch(`/api/backoffice/productos/${productoEditando}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar producto")
+      }
+
+      await refetchProductos()
+      setModoEdicion(false)
+      setProductoEditando(null)
+      setIsOpen(false)
+
+      toast({
+        title: "Producto eliminado",
+        description: "El producto ha sido eliminado correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el producto",
+        variant: "destructive",
+      })
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -495,28 +535,206 @@ export default function ProductosPage() {
         <div className="flex-1">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Productos</h1>
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#1e4b8e] hover:bg-transparent hover:text-[#163a70] bg-transparent"
-              onClick={() => {
-                setNuevoProducto({
-                  nombre: "",
-                  descripcion: "",
-                  precio: "",
-                  imagen: "/placeholder.svg?height=400&width=400",
-                  categoria: "",
-                  visible: true,
-                  subcategoria: "",
-                  descuento: 0,
-                })
-                setModoEdicion(false)
-                setProductoEditando(null)
-                setIsOpen(true)
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Agregar producto
-            </Button>
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#1e4b8e] hover:bg-transparent hover:text-[#163a70] bg-transparent"
+                  onClick={() => {
+                    setNuevoProducto({
+                      nombre: "",
+                      descripcion: "",
+                      precio: "",
+                      imagen: "/placeholder.svg?height=400&width=400",
+                      categoria: "",
+                      visible: true,
+                      subcategoria: "",
+                      descuento: 0,
+                    })
+                    setModoEdicion(false)
+                    setProductoEditando(null)
+                    setIsOpen(true)
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar producto
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="w-[95vw] max-w-[500px] max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-medium text-gray-800">
+                    {modoEdicion ? "Editar producto" : "Agregar producto"}
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="mt-3 space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="nombre-producto" className="text-sm font-medium text-gray-700">
+                      Nombre
+                    </Label>
+                    <Input
+                      id="nombre-producto"
+                      placeholder="Ej: Hamburguesa clásica"
+                      value={nuevoProducto.nombre}
+                      onChange={(e) => setNuevoProducto({ ...nuevoProducto, nombre: e.target.value })}
+                      className="bg-gray-50 border-0 h-10"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="descripcion-producto" className="text-sm font-medium text-gray-700">
+                      Descripción
+                    </Label>
+                    <Textarea
+                      id="descripcion-producto"
+                      placeholder="Describe el producto"
+                      value={nuevoProducto.descripcion}
+                      onChange={(e) => setNuevoProducto({ ...nuevoProducto, descripcion: e.target.value })}
+                      className="bg-gray-50 border-0 min-h-20"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-gray-700">Precio</Label>
+                      <Input
+                        type="number"
+                        placeholder="0.00"
+                        value={nuevoProducto.precio}
+                        onChange={(e) => setNuevoProducto({ ...nuevoProducto, precio: e.target.value })}
+                        className="bg-gray-50 border-0 h-10"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-gray-700">Descuento (%)</Label>
+                      <Input
+                        type="number"
+                        placeholder="0"
+                        value={nuevoProducto.descuento || ""}
+                        onChange={(e) =>
+                          setNuevoProducto({ ...nuevoProducto, descuento: Number(e.target.value) || 0 })
+                        }
+                        className="bg-gray-50 border-0 h-10"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-gray-700">Categoría</Label>
+                      <Select
+                        value={nuevoProducto.categoria}
+                        onValueChange={(value) =>
+                          setNuevoProducto({ ...nuevoProducto, categoria: value, subcategoria: "" })
+                        }
+                      >
+                        <SelectTrigger className="bg-gray-50 border-0 h-10">
+                          <SelectValue placeholder="Selecciona" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categorias.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {cat.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-sm font-medium text-gray-700">Subcategoría</Label>
+                      <Select
+                        value={nuevoProducto.subcategoria || ""}
+                        onValueChange={(value) => setNuevoProducto({ ...nuevoProducto, subcategoria: value })}
+                        disabled={!nuevoProducto.categoria}
+                      >
+                        <SelectTrigger className="bg-gray-50 border-0 h-10">
+                          <SelectValue placeholder="Ninguna" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {subcategorias
+                            .filter((sub) => sub.categoria_id === nuevoProducto.categoria)
+                            .map((sub) => (
+                              <SelectItem key={sub.id} value={sub.id}>
+                                {sub.nombre}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-medium text-gray-700">Imagen</Label>
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border bg-gray-100">
+                        <Image
+                          src={nuevoProducto.imagen || "/placeholder.svg?height=400&width=400"}
+                          alt="Vista previa"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id="imagen-producto"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={uploadingImage}
+                          onClick={() => document.getElementById("imagen-producto")?.click()}
+                        >
+                          {uploadingImage ? "Subiendo..." : "Cambiar imagen"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+                    <span className="text-sm text-gray-700">Visible en la tienda</span>
+                    <Switch
+                      checked={nuevoProducto.visible}
+                      onCheckedChange={(checked) => setNuevoProducto({ ...nuevoProducto, visible: checked })}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1 h-10 border-0 bg-gray-50"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        className="flex-1 h-10 bg-[#1e4b8e] hover:bg-[#163a70]"
+                        disabled={saving}
+                        onClick={modoEdicion ? guardarEdicion : agregarProducto}
+                      >
+                        {saving ? "Guardando..." : modoEdicion ? "Guardar" : "Crear"}
+                      </Button>
+                    </div>
+                    {modoEdicion && (
+                      <Button
+                        variant="ghost"
+                        className="h-10 text-red-500 hover:bg-red-50 hover:text-red-600"
+                        disabled={saving}
+                        onClick={eliminarProductoDesdeDialogo}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar producto
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {loading ? (
@@ -731,8 +949,6 @@ export default function ProductosPage() {
           )}
         </div>
       </div>
-
-      {/* AlertDialog component remains unchanged */}
     </div>
   )
 }

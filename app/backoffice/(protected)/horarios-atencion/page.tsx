@@ -201,7 +201,7 @@ export default function HorariosAtencionPage() {
         description: "Los horarios de atención han sido guardados correctamente",
       })
 
-      setTimeout(() => router.push("/"), 1000)
+      setTimeout(() => router.push("/backoffice"), 1000)
     } catch (error) {
       console.error("[v0] Error saving business hours:", error)
       toast({
