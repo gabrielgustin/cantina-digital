@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, memo } from "react"
-import { Home, MapPin, Instagram, MessageCircle, Facebook, Globe } from "lucide-react"
+import { Home, MapPin, Instagram, MessageCircle, Facebook, Globe, Lock } from "lucide-react"
 import Link from "next/link"
 
 interface SideMenuClientProps {
@@ -129,6 +129,15 @@ export const SideMenuClient = memo(function SideMenuClient({
                   <span>WhatsApp</span>
                 </a>
               )}
+
+              <Link
+                href="/backoffice"
+                className="flex items-center text-white text-xl font-semibold hover:opacity-90 transition-opacity"
+                onClick={onClose}
+              >
+                <Lock className="mr-4" size={24} />
+                <span>Admin</span>
+              </Link>
             </nav>
           </div>
 
