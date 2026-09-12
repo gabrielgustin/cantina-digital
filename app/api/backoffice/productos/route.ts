@@ -56,9 +56,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "La categoría es obligatoria" }, { status: 400 })
     }
 
+    const id = crypto.randomUUID()
+
     const result = await sql`
-      INSERT INTO productos (nombre, descripcion, precio, imagen, categoria, visible, subcategoria, descuento)
+      INSERT INTO productos (id, nombre, descripcion, precio, imagen, categoria, visible, subcategoria, descuento)
       VALUES (
+        ${id},
         ${nombre}, 
         ${descripcion || ""}, 
         ${Number.parseInt(precio) || 0}, 
