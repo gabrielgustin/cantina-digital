@@ -29,7 +29,7 @@ export default async function RootLayout({
   const colors = await getSiteColors()
 
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{
           __html: `:root {
