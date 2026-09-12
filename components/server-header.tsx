@@ -11,7 +11,7 @@ export async function ServerHeader() {
   const autogestivaUrl = config.autogestiva_url || null
   const facebookUrl = config.facebook_url || null
   const websiteUrl = config.website_url || null
-  const address = config.address || null
+  const address = config.store_location || null
 
   const rawWhatsapp = config.contact_whatsapp || null
   const whatsappUrl = rawWhatsapp ? `https://wa.me/${rawWhatsapp.replace(/[\s\-()]/g, "")}` : null

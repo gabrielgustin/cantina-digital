@@ -361,7 +361,7 @@ export async function getAllSiteConfigOptimized(): Promise<Record<string, string
     const result = await client`
       SELECT config_key, config_value
       FROM site_config
-      WHERE config_key IN ('store_logo', 'header_logo_url', 'site_name', 'instagram_url', 'facebook_url', 'website_url', 'autogestiva_url', 'contact_whatsapp', 'address')
+      WHERE config_key IN ('store_logo', 'header_logo_url', 'site_name', 'instagram_url', 'facebook_url', 'website_url', 'autogestiva_url', 'contact_whatsapp', 'store_location')
     `
     const config: Record<string, string> = {}
     for (const row of result as SiteConfig[]) {
