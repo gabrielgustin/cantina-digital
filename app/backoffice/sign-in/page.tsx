@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { headers } from "next/headers"
@@ -16,8 +17,17 @@ export default async function BackofficeSignInPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-[#1e4b8e]">Backoffice</h1>
-          <p className="text-sm text-gray-500 mt-1">Iniciá sesión para administrar tu tienda</p>
+          <div className="inline-flex items-center justify-center rounded-xl bg-[#1e4b8e] px-6 py-4">
+            <Image
+              src="/images/logoautogestiva.png"
+              alt="Autogestiva"
+              width={500}
+              height={100}
+              className="h-12 w-auto"
+              priority
+            />
+          </div>
+          <p className="text-sm text-gray-500 mt-3">Iniciá sesión para administrar tu tienda</p>
         </div>
         <BackofficeSignInForm />
         <Link
