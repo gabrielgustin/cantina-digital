@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, type ReactNode, useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
 
 // Definir tipos para nuestros datos
 export interface Categoria {
@@ -137,6 +138,8 @@ const initialHorariosAtencion: HorariosAtencion = {
 
 // Proveedor del contexto
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname()
+  const isUnauthenticatedRoute = pathname?.startsWith("/backoffice/sign-in") || pathname?.startsWith("/backoffice/setup")
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [productos, setProductos] = useState<Producto[]>([])
   const [metodosPago, setMetodosPago] = useState<MetodoPago[]>([
@@ -192,6 +195,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    if (isUnauthenticatedRoute) {
+      setLoading(false)
+      return
+    }
     console.log("[v0] StoreProvider mounted, fetching initial data...")
     const fetchData = async () => {
       setLoading(true)
@@ -200,7 +207,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       console.log("[v0] Initial data fetch complete")
     }
     fetchData()
-  }, [])
+  }, [isUnauthenticatedRoute])
 
   return (
     <StoreContext.Provider
