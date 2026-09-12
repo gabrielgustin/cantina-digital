@@ -1,8 +1,13 @@
 import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
+import { requireBackofficeSession } from "@/lib/backoffice-auth"
 
 export async function POST(request: Request) {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     console.log("[v0] Upload endpoint called")
 
     const formData = await request.formData()

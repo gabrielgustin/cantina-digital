@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server"
 import { sql } from "@/lib/backoffice-db"
+import { requireBackofficeSession } from "@/lib/backoffice-auth"
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const body = await request.json()
     const { nombre, descripcion, precio, imagen, categoria, visible, subcategoria, descuento } = body
     const { id } = await params
@@ -56,6 +61,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const { id } = await params
 
     console.log("[v0] Deleting product with ID:", id)

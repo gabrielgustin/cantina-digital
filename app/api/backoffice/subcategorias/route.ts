@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server"
 import { sql } from "@/lib/backoffice-db"
+import { requireBackofficeSession } from "@/lib/backoffice-auth"
 
 export async function GET() {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const subcategorias = await sql`
       SELECT s.*, c.nombre as categoria_nombre 
       FROM subcategorias s
@@ -19,6 +24,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const { nombre, categoria_id } = await request.json()
 
     if (!nombre || !categoria_id) {
@@ -58,6 +67,10 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")
     const { nombre } = await request.json()
@@ -86,6 +99,10 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")
 

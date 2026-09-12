@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server"
 import { sql } from "@/lib/backoffice-db"
+import { requireBackofficeSession } from "@/lib/backoffice-auth"
 
 export async function GET() {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     console.log("[v0] Fetching business hours from database")
 
     const hours = await sql`
@@ -56,6 +61,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!(await requireBackofficeSession())) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
+    }
+
     const body = await request.json()
     console.log("[v0] Creating/updating business hours:", body)
 
