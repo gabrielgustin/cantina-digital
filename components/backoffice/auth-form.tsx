@@ -1,14 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 export function BackofficeSignInForm() {
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -27,8 +25,12 @@ export function BackofficeSignInForm() {
       return
     }
 
-    router.push("/backoffice")
-    router.refresh()
+    // Force a full page navigation (not a client-side router.push) so the
+    // backoffice's server-side session check always sees the freshly set
+    // session cookie on the very next request. A soft navigation can race
+    // ahead of the cookie being committed, leaving the user stuck on sign-in
+    // until they manually refresh.
+    window.location.assign("/backoffice")
   }
 
   return (
