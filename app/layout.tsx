@@ -31,15 +31,19 @@ export default async function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <style dangerouslySetInnerHTML={{
-          __html: `:root {
+        <style
+          id="site-colors"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `:root {
             --color-primario: ${colors.color_primario};
             --color-secundario: ${colors.color_secundario};
             --color-acento: ${colors.color_acento};
             --color-fondo: ${colors.color_fondo};
             --color-texto: ${colors.color_texto};
-          }`
-        }} />
+          }`,
+          }}
+        />
       </head>
       <body className={`${inter.className} ${anton.variable} ${openSans.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
