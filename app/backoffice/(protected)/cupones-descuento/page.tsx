@@ -5,7 +5,6 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ArrowLeft, Plus, AlertTriangle, Info, X, Pencil, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -59,7 +58,6 @@ export default function CuponesDescuentoPage() {
         const couponsResponse = await fetch("/api/backoffice/coupons")
         if (couponsResponse.ok) {
           const couponsResult = await couponsResponse.json()
-          console.log("[v0] Coupons received:", couponsResult)
           if (couponsResult.success && Array.isArray(couponsResult.data)) {
             setCupones(couponsResult.data)
           }
@@ -367,14 +365,33 @@ export default function CuponesDescuentoPage() {
 
       {/* Content */}
       <div className="max-w-3xl mx-auto p-6">
-        {!habilitarCupones && (
-          <Alert className="bg-amber-50 border-amber-200 text-amber-800 mb-6">
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            <AlertDescription className="text-sm">
-              Los cupones de descuento están deshabilitados. Activa el interruptor arriba para comenzar a usarlos.
-            </AlertDescription>
-          </Alert>
-        )}
+        <div
+          className={`mb-6 flex items-center justify-between gap-4 rounded-lg border p-4 ${
+            habilitarCupones ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            {habilitarCupones ? (
+              <Info className="h-5 w-5 shrink-0 text-green-600" />
+            ) : (
+              <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
+            )}
+            <div>
+              <p className="text-sm font-medium text-gray-800">Cupones de descuento</p>
+              <p className="text-sm text-gray-600">
+                {habilitarCupones
+                  ? "Los cupones están habilitados para tus clientes."
+                  : "Habilitá los cupones para que tus clientes puedan utilizarlos."}
+              </p>
+            </div>
+          </div>
+          <Switch
+            checked={habilitarCupones}
+            onCheckedChange={handleToggleCupones}
+            disabled={isLoading}
+            aria-label="Habilitar cupones de descuento"
+          />
+        </div>
 
         {cupones.length === 0 ? (
           <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-center mb-8">
