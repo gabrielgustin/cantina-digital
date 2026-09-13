@@ -16,6 +16,7 @@ import { useStore, type Categoria } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
 import PreviewButton from "@/components/backoffice/preview-button"
 import { SignOutButton } from "@/components/backoffice/sign-out-button"
+import { uploadBackofficeImage } from "@/lib/backoffice-image-upload"
 
 export default function CategoriasPage() {
   const { categorias, productos, refetchCategorias, loading } = useStore()
@@ -148,56 +149,19 @@ export default function CategoriasPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Error",
-        description: "Por favor selecciona un archivo de imagen válido",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "Error",
-        description: "La imagen no debe superar los 5MB",
-        variant: "destructive",
-      })
-      return
-    }
-
     setUploadingImage(true)
     try {
       console.log("[v0] Attempting to upload image:", file.name, file.type)
 
-      const formData = new FormData()
-      formData.append("file", file)
+      const url = await uploadBackofficeImage(file)
 
-      const response = await fetch("/api/backoffice/upload", {
-        method: "POST",
-        body: formData,
-      })
+      console.log("[v0] Upload successful, received url:", url)
 
-      console.log("[v0] Upload response status:", response.status)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error("[v0] Upload failed with error:", errorData)
-        throw new Error(errorData.error || "Error al subir la imagen")
-      }
-
-      const data = await response.json()
-      console.log("[v0] Upload successful, received data:", data)
-
-      if (!data.url) {
-        throw new Error("No se recibió la URL de la imagen")
-      }
-
-      setNuevaCategoria({ ...nuevaCategoria, imagen: data.url })
+      setNuevaCategoria({ ...nuevaCategoria, imagen: url })
 
       toast({
         title: "Imagen cargada",
-        description: `La imagen ha sido cargada correctamente. Reducción: ${data.reduction || "N/A"}`,
+        description: "La imagen ha sido cargada correctamente",
       })
     } catch (error) {
       console.error("[v0] Error uploading image:", error)
