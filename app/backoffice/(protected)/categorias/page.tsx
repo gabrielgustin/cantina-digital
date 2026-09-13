@@ -34,6 +34,8 @@ export default function CategoriasPage() {
   const [subcategorias, setSubcategorias] = useState<Array<{ id: string; nombre: string; categoria_id: string }>>([])
   const [nuevaSubcategoria, setNuevaSubcategoria] = useState("")
   const [loadingSubcategorias, setLoadingSubcategorias] = useState(false)
+  const [addingSubcategoria, setAddingSubcategoria] = useState(false)
+  const [recienAgregadaId, setRecienAgregadaId] = useState<string | null>(null)
 
   const cargarSubcategorias = async (categoriaId: string) => {
     setLoadingSubcategorias(true)
@@ -64,6 +66,7 @@ export default function CategoriasPage() {
       return
     }
 
+    setAddingSubcategoria(true)
     try {
       const response = await fetch("/api/backoffice/subcategorias", {
         method: "POST",
@@ -76,8 +79,12 @@ export default function CategoriasPage() {
 
       if (!response.ok) throw new Error("Error al crear subcategoría")
 
+      const nueva = await response.json()
+
       await cargarSubcategorias(categoriaEditando)
       setNuevaSubcategoria("")
+      setRecienAgregadaId(nueva.id)
+      setTimeout(() => setRecienAgregadaId(null), 500)
 
       toast({
         title: "Subcategoría agregada",
@@ -90,6 +97,8 @@ export default function CategoriasPage() {
         description: "No se pudo agregar la subcategoría",
         variant: "destructive",
       })
+    } finally {
+      setAddingSubcategoria(false)
     }
   }
 
@@ -441,6 +450,8 @@ export default function CategoriasPage() {
                   setCategoriaEditando(null)
                   setSubcategorias([])
                   setNuevaSubcategoria("")
+                  setAddingSubcategoria(false)
+                  setRecienAgregadaId(null)
                   setNuevaCategoria({
                     nombre: "",
                     visible: true,
@@ -534,7 +545,11 @@ export default function CategoriasPage() {
                           {subcategorias.map((sub) => (
                             <div
                               key={sub.id}
-                              className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+                              className={`flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 transition-all duration-300 ${
+                                recienAgregadaId === sub.id
+                                  ? "animate-in fade-in slide-in-from-top-2"
+                                  : ""
+                              }`}
                             >
                               <span className="text-sm text-gray-700">{sub.nombre}</span>
                               <Button
@@ -564,12 +579,23 @@ export default function CategoriasPage() {
                               agregarSubcategoria()
                             }
                           }}
+                          disabled={addingSubcategoria}
                           className="bg-gray-50 border-0 h-10"
                         />
-                        <Button type="button" variant="outline" onClick={agregarSubcategoria}>
-                          Agregar
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={agregarSubcategoria}
+                          disabled={addingSubcategoria || nuevaSubcategoria.trim() === ""}
+                        >
+                          {addingSubcategoria ? "Agregando..." : "Agregar"}
                         </Button>
                       </div>
+                      {nuevaSubcategoria.trim() !== "" && (
+                        <p className="text-xs text-amber-600">
+                          Hacé clic en "Agregar" para guardar la subcategoría antes de continuar.
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -584,7 +610,7 @@ export default function CategoriasPage() {
                       </Button>
                       <Button
                         className="flex-1 h-10 bg-[#1e4b8e] hover:bg-[#163a70]"
-                        disabled={saving}
+                        disabled={saving || nuevaSubcategoria.trim() !== ""}
                         onClick={modoEdicion ? guardarEdicion : agregarCategoria}
                       >
                         {saving ? "Guardando..." : modoEdicion ? "Guardar" : "Crear"}
