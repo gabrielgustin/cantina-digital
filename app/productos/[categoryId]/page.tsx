@@ -27,7 +27,7 @@ export default async function ProductsPage({ params }: { params: { categoryId: s
       products={products}
       category={category}
       categoryId={categoryId}
-      brands={subcategorias.map((s) => s.nombre)}
+      subcategorias={subcategorias.map((s) => ({ id: s.id, nombre: s.nombre }))}
     >
       <ServerHeader />
     </ProductsPageClient>
