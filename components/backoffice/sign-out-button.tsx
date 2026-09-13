@@ -23,9 +23,10 @@ export function SignOutButton() {
       className="text-white hover:bg-white/10 hover:text-white"
       onClick={handleSignOut}
       disabled={isLoading}
+      aria-label="Cerrar sesión"
     >
-      <LogOut className="h-4 w-4 mr-2" />
-      Cerrar sesión
+      <LogOut className="h-4 w-4 md:mr-2" />
+      <span className="hidden md:inline">Cerrar sesión</span>
     </Button>
   )
 }
