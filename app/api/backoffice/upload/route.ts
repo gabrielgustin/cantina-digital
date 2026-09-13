@@ -1,6 +1,19 @@
 import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
+import sharp from "sharp"
 import { requireBackofficeSession } from "@/lib/backoffice-auth"
+
+// Uniform canvas size every uploaded image is normalized into. Images are never
+// cropped: they are scaled to fit inside this square and centered on a neutral
+// background, so every product/category/banner image renders consistently.
+const CANVAS_SIZE = 1200
+const CANVAS_BACKGROUND = "#ffffff"
+
+function toWebpFileName(originalName: string) {
+  const withoutExtension = originalName.replace(/\.[^/.]+$/, "")
+  const safeName = withoutExtension.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase() || "imagen"
+  return `${safeName}.webp`
+}
 
 export async function POST(request: Request) {
   try {
@@ -27,12 +40,35 @@ export async function POST(request: Request) {
     console.log("[v0] Original file:", file.name, "Type:", file.type, "Size:", (file.size / 1024).toFixed(2), "KB")
 
     try {
-      console.log("[v0] Uploading to Blob:", file.name)
+      const originalBuffer = Buffer.from(await file.arrayBuffer())
 
-      const blob = await put(file.name, file, {
+      // Normalize every upload to the same square canvas using "contain" so the
+      // full image is always visible (never cropped), then convert to WebP to
+      // minimize storage size.
+      const optimizedBuffer = await sharp(originalBuffer)
+        .resize(CANVAS_SIZE, CANVAS_SIZE, {
+          fit: "contain",
+          background: CANVAS_BACKGROUND,
+        })
+        .webp({ quality: 82 })
+        .toBuffer()
+
+      const optimizedFileName = toWebpFileName(file.name)
+
+      console.log(
+        "[v0] Optimized image:",
+        optimizedFileName,
+        "Size:",
+        (optimizedBuffer.length / 1024).toFixed(2),
+        "KB",
+      )
+
+      console.log("[v0] Uploading to Blob:", optimizedFileName)
+
+      const blob = await put(optimizedFileName, optimizedBuffer, {
         access: "public",
         addRandomSuffix: true,
-        contentType: file.type,
+        contentType: "image/webp",
       })
 
       console.log("[v0] Upload successful:", blob.url)
@@ -40,6 +76,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         url: blob.url,
         originalSize: file.size,
+        optimizedSize: optimizedBuffer.length,
       })
     } catch (blobError) {
       console.error("[v0] Error uploading to Blob:", blobError)
