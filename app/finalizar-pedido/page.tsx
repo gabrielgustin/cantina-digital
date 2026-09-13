@@ -263,8 +263,8 @@ ${deliveryCost > 0 ? `*Envío: ${formatPrice(deliveryCost)}*` : ""}
                     }}
                     className={`p-3 md:p-4 rounded-lg border-2 transition-all text-sm md:text-base font-medium ${
                       deliveryMethod?.id === method.id
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-gray-300 hover:border-blue-400"
+                        ? "border-[#1e4b8e] bg-[#1e4b8e] text-white"
+                        : "border-gray-300 hover:border-[#1e4b8e]"
                     }`}
                   >
                     <div className="font-semibold">{method.name}</div>
@@ -329,8 +329,8 @@ ${deliveryCost > 0 ? `*Envío: ${formatPrice(deliveryCost)}*` : ""}
                     }}
                     className={`p-3 md:p-4 rounded-lg border-2 transition-all text-sm md:text-base font-medium ${
                       paymentMethod === method.name.toLowerCase()
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-gray-300 hover:border-blue-400"
+                        ? "border-[#1e4b8e] bg-[#1e4b8e] text-white"
+                        : "border-gray-300 hover:border-[#1e4b8e]"
                     }`}
                   >
                     {method.name}
