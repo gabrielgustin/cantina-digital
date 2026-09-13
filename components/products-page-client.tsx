@@ -71,11 +71,14 @@ export function ProductsPageClient({
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 overflow-x-auto">
           <div className="flex gap-2 flex-1 overflow-x-auto scrollbar-hide">
             <button
-              onClick={() => setSelectedSubcategoryId("todos")}
-              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all flex-shrink-0 ${
+              onClick={() => {
+                setSelectedSubcategoryId("todos")
+                setSelectedFilterIds([])
+              }}
+              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-200 flex-shrink-0 border ${
                 selectedSubcategoryId === "todos"
-                  ? "bg-tupedido-blue text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-[#1e4b8e] border-[#1e4b8e] text-white shadow-sm"
+                  : "bg-gray-100 border-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
               Todos
@@ -83,11 +86,14 @@ export function ProductsPageClient({
             {subcategorias.map((sub) => (
               <button
                 key={sub.id}
-                onClick={() => setSelectedSubcategoryId(sub.id)}
-                className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all flex-shrink-0 ${
+                onClick={() => {
+                  setSelectedSubcategoryId(sub.id)
+                  setSelectedFilterIds([])
+                }}
+                className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-200 flex-shrink-0 border ${
                   selectedSubcategoryId === sub.id
-                    ? "bg-tupedido-blue text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-[#1e4b8e] border-[#1e4b8e] text-white shadow-sm scale-[1.02]"
+                    : "bg-gray-100 border-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {sub.nombre}
