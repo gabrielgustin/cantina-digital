@@ -178,7 +178,8 @@ export default function ProductDetailPage({
                 src={validImageUrl || "/placeholder.svg"}
                 alt={product.title}
                 fill
-                className="object-contain p-6"
+                className="object-contain p-3 sm:p-5 md:p-6"
+                sizes="(max-width: 380px) calc(100vw - 2rem), (max-width: 640px) calc(100vw - 2.5rem), 384px"
                 priority
               />
             </div>
@@ -193,7 +194,7 @@ export default function ProductDetailPage({
             {product.discount && product.discount > 0 ? (
               <div className="flex items-baseline gap-2 flex-wrap">
                 <p
-                  className="text-2xl md:text-[28px] font-bold"
+                  className="text-2xl md:text-[28px] font-bold product-title-font"
                   style={{ color: "var(--color-primario)" }}
                 >
                   {formatPrice(product.price * (1 - product.discount / 100))}
@@ -217,7 +218,7 @@ export default function ProductDetailPage({
           )}
 
           <div className="py-5">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">Observación</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">Agregar observación al pedido</h3>
             <textarea
               value={observation}
               onChange={(e) => setObservation(e.target.value)}
@@ -253,10 +254,10 @@ export default function ProductDetailPage({
 
             <button
               onClick={handleAddToCart}
-              className="flex-1 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-between gap-3 shadow-md hover:opacity-90 transition-opacity"
+                className="flex-1 min-w-0 text-white font-bold py-3 px-3 md:px-4 rounded-xl flex items-center justify-between gap-2 md:gap-3 shadow-md hover:opacity-90 transition-opacity"
               style={{ backgroundColor: "var(--color-primario)" }}
             >
-              <span className="text-sm md:text-base">Agregar al carrito</span>
+              <span className="text-sm md:text-base truncate"><span className="md:hidden">Agregar</span><span className="hidden md:inline">Agregar al carrito</span></span>
               <span className="text-sm md:text-base">{formatPrice(totalPrice)}</span>
             </button>
           </div>
