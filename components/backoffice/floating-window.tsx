@@ -1,7 +1,5 @@
 "use client"
 
-import { X } from "lucide-react"
-
 interface FloatingWindowProps {
   url: string
   isOpen: boolean
@@ -27,14 +25,6 @@ export default function FloatingWindow({ url, isOpen, onClose }: FloatingWindowP
           animation: "windowAppear 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-50 bg-white hover:bg-gray-100 text-gray-700 hover:text-gray-900 rounded-full p-2 shadow-lg transition-all hover:scale-110"
-          aria-label="Cerrar ventana"
-        >
-          <X className="h-5 w-5" />
-        </button>
-
         <div className="flex-1 bg-white overflow-hidden">
           <iframe
             src={url}

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
 import { getCategoryById } from "@/lib/db"
 
-export async function GET(request: Request, { params }: { params: { categoryId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ categoryId: string }> }) {
   try {
-    const category = await getCategoryById(params.categoryId)
+    const { categoryId } = await params
+    const category = await getCategoryById(categoryId)
 
     if (!category) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 })

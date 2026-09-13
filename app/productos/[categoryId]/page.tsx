@@ -4,8 +4,12 @@ import { getProductsByCategory, getCategoryById, getSubcategoriesByCategory } fr
 
 export const revalidate = 10 // Revalidate every 10 seconds
 
-export default async function ProductsPage({ params }: { params: { categoryId: string } }) {
-  const { categoryId } = params
+export default async function ProductsPage({
+  params,
+}: {
+  params: Promise<{ categoryId: string }>
+}) {
+  const { categoryId } = await params
 
   console.log("[v0] ProductsPage - Fetching data for category:", categoryId)
 
@@ -27,7 +31,7 @@ export default async function ProductsPage({ params }: { params: { categoryId: s
       products={products}
       category={category}
       categoryId={categoryId}
-      brands={subcategorias.map((s) => s.nombre)}
+      subcategorias={subcategorias.map((s) => ({ id: s.id, nombre: s.nombre }))}
     >
       <ServerHeader />
     </ProductsPageClient>

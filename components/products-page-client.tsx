@@ -11,6 +11,7 @@ interface Product {
   id: string
   title: string
   subtitle: string
+  subcategoria_id?: string
   image_url: string
   price: number
   category_id: string
@@ -23,56 +24,43 @@ interface Category {
   subtitle: string
 }
 
+interface Subcategoria {
+  id: string
+  nombre: string
+}
+
 interface ProductsPageClientProps {
   products: Product[]
   category: Category | null
   categoryId: string
-  brands: string[] // Add brands prop
+  subcategorias: Subcategoria[] // Subcategorias that belong to this category
   children: ReactNode
 }
 
-export function ProductsPageClient({ products, category, categoryId, brands, children }: ProductsPageClientProps) {
+export function ProductsPageClient({
+  products,
+  category,
+  categoryId,
+  subcategorias,
+  children,
+}: ProductsPageClientProps) {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("todos")
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([])
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string>("todos")
+  const [selectedFilterIds, setSelectedFilterIds] = useState<string[]>([])
 
-  const subcategories = ["Todos", ...brands]
-  const availableFilters = brands
-
-  const handleApplyFilters = (filters: string[]) => {
-    setSelectedFilters(filters)
-    console.log("[v0] Applied filters:", filters)
+  const handleApplyFilters = (filterIds: string[]) => {
+    setSelectedFilterIds(filterIds)
   }
 
   const filteredProducts = products.filter((product) => {
-    // Extract subcategory name from subtitle (format: "subcategoria-categoria")
-    const productSubcategory = product.subtitle?.split("-")[0]?.toLowerCase() || ""
-
-    // If subcategory is selected (not "todos"), filter by subcategory
     const matchesSubcategory =
-      selectedSubcategory === "todos" || productSubcategory === selectedSubcategory.toLowerCase()
+      selectedSubcategoryId === "todos" || product.subcategoria_id === selectedSubcategoryId
 
-    // If filters are applied, product must match at least one filter
     const matchesFilters =
-      selectedFilters.length === 0 ||
-      selectedFilters.some((filter) => {
-        const filterLower = filter.toLowerCase()
-        const match = productSubcategory === filterLower
-        console.log("[v0] Filter comparison:", { product: product.id, productSubcategory, filter, filterLower, match })
-        return match
-      })
+      selectedFilterIds.length === 0 || selectedFilterIds.includes(product.subcategoria_id || "")
 
     return matchesSubcategory && matchesFilters
   })
-
-  console.log("[v0] Total products:", products.length)
-  console.log("[v0] Filtered products:", filteredProducts.length)
-  console.log("[v0] Selected subcategory:", selectedSubcategory)
-  console.log("[v0] Selected filters:", selectedFilters)
-  console.log(
-    "[v0] Product subtitles:",
-    products.map((p) => ({ id: p.id, subtitle: p.subtitle, extracted: p.subtitle?.split("-")[0] })),
-  )
 
   return (
     <main className="flex flex-col h-screen">
@@ -82,17 +70,33 @@ export function ProductsPageClient({ products, category, categoryId, brands, chi
         {/* Subcategories navigation and filters button */}
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 overflow-x-auto">
           <div className="flex gap-2 flex-1 overflow-x-auto scrollbar-hide">
-            {subcategories.map((sub) => (
+            <button
+              onClick={() => {
+                setSelectedSubcategoryId("todos")
+                setSelectedFilterIds([])
+              }}
+              className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-200 flex-shrink-0 border ${
+                selectedSubcategoryId === "todos"
+                  ? "bg-[#1e4b8e] border-[#1e4b8e] text-white shadow-sm"
+                  : "bg-gray-100 border-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              Todos
+            </button>
+            {subcategorias.map((sub) => (
               <button
-                key={sub}
-                onClick={() => setSelectedSubcategory(sub.toLowerCase())}
-                className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all flex-shrink-0 ${
-                  selectedSubcategory === sub.toLowerCase()
-                    ? "bg-tupedido-blue text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                key={sub.id}
+                onClick={() => {
+                  setSelectedSubcategoryId(sub.id)
+                  setSelectedFilterIds([])
+                }}
+                className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all duration-200 flex-shrink-0 border ${
+                  selectedSubcategoryId === sub.id
+                    ? "bg-[#1e4b8e] border-[#1e4b8e] text-white shadow-sm scale-[1.02]"
+                    : "bg-gray-100 border-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                {sub}
+                {sub.nombre}
               </button>
             ))}
           </div>
@@ -135,7 +139,7 @@ export function ProductsPageClient({ products, category, categoryId, brands, chi
         isOpen={isFiltersOpen}
         onClose={() => setIsFiltersOpen(false)}
         onApply={handleApplyFilters}
-        availableFilters={availableFilters}
+        availableFilters={subcategorias}
       />
     </main>
   )

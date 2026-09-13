@@ -2,18 +2,29 @@ import { NextResponse } from "next/server"
 import { sql } from "@/lib/backoffice-db"
 import { requireBackofficeSession } from "@/lib/backoffice-auth"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     if (!(await requireBackofficeSession())) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 })
     }
 
-    const subcategorias = await sql`
-      SELECT s.*, c.nombre as categoria_nombre 
-      FROM subcategorias s
-      LEFT JOIN categorias c ON s.categoria_id = c.id
-      ORDER BY s.nombre ASC
-    `
+    const { searchParams } = new URL(request.url)
+    const categoriaId = searchParams.get("categoria_id")
+
+    const subcategorias = categoriaId
+      ? await sql`
+          SELECT s.*, c.nombre as categoria_nombre 
+          FROM subcategorias s
+          LEFT JOIN categorias c ON s.categoria_id = c.id
+          WHERE s.categoria_id = ${categoriaId}
+          ORDER BY s.nombre ASC
+        `
+      : await sql`
+          SELECT s.*, c.nombre as categoria_nombre 
+          FROM subcategorias s
+          LEFT JOIN categorias c ON s.categoria_id = c.id
+          ORDER BY s.nombre ASC
+        `
 
     return NextResponse.json(subcategorias)
   } catch (error) {

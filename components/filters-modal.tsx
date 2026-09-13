@@ -3,11 +3,16 @@
 import { X, Filter } from "lucide-react"
 import { useState } from "react"
 
+interface Subcategoria {
+  id: string
+  nombre: string
+}
+
 interface FiltersModalProps {
   isOpen: boolean
   onClose: () => void
-  onApply: (filters: string[]) => void
-  availableFilters: string[]
+  onApply: (filterIds: string[]) => void
+  availableFilters: Subcategoria[]
 }
 
 export function FiltersModal({ isOpen, onClose, onApply, availableFilters }: FiltersModalProps) {
@@ -15,8 +20,8 @@ export function FiltersModal({ isOpen, onClose, onApply, availableFilters }: Fil
 
   if (!isOpen) return null
 
-  const toggleFilter = (filter: string) => {
-    setSelectedFilters((prev) => (prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter]))
+  const toggleFilter = (filterId: string) => {
+    setSelectedFilters((prev) => (prev.includes(filterId) ? prev.filter((f) => f !== filterId) : [...prev, filterId]))
   }
 
   const handleApply = () => {
@@ -46,15 +51,15 @@ export function FiltersModal({ isOpen, onClose, onApply, availableFilters }: Fil
         <div className="flex flex-wrap gap-2 mb-6">
           {availableFilters.map((filter) => (
             <button
-              key={filter}
-              onClick={() => toggleFilter(filter)}
+              key={filter.id}
+              onClick={() => toggleFilter(filter.id)}
               className={`px-4 py-2 rounded-full border transition-all ${
-                selectedFilters.includes(filter)
+                selectedFilters.includes(filter.id)
                   ? "bg-tupedido-blue text-white border-tupedido-blue"
                   : "bg-white text-gray-700 border-gray-300 hover:border-tupedido-blue"
               }`}
             >
-              {filter}
+              {filter.nombre}
             </button>
           ))}
         </div>

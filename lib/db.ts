@@ -31,6 +31,7 @@ export interface Product {
   category_id: string
   title: string
   subtitle: string
+  subcategoria_id?: string
   image_url: string
   description: string
   price: number
@@ -264,12 +265,14 @@ export async function getProductsByCategory(categoryId: string): Promise<Product
     }
 
     const result = await client`
-      SELECT id, categoria as category_id, nombre as title, subcategoria,
-             imagen as image_url, descripcion as description,
-             precio, descuento, false as is_promo, created_at
-      FROM productos
-      WHERE categoria = ${categoryId} AND visible = true
-      ORDER BY created_at ASC
+      SELECT p.id, p.categoria as category_id, p.nombre as title,
+             p.subcategoria as subcategoria_id, s.nombre as subcategoria_nombre,
+             p.imagen as image_url, p.descripcion as description,
+             p.precio, p.descuento, false as is_promo, p.created_at
+      FROM productos p
+      LEFT JOIN subcategorias s ON p.subcategoria = s.id
+      WHERE p.categoria = ${categoryId} AND p.visible = true
+      ORDER BY p.created_at ASC
     `
     console.log("[v0] Products found:", result.length)
 
@@ -277,7 +280,8 @@ export async function getProductsByCategory(categoryId: string): Promise<Product
       id: prod.id,
       category_id: prod.category_id,
       title: prod.title,
-      subtitle: prod.subcategoria || "", // Using subcategoria field as subtitle
+      subtitle: prod.subcategoria_nombre || "", // Display name of the subcategoria
+      subcategoria_id: prod.subcategoria_id || "",
       image_url: sanitizeImageUrl(
         prod.image_url,
         `/placeholder.svg?height=300&width=300&query=${encodeURIComponent(prod.title)}`,
