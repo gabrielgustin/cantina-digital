@@ -446,7 +446,7 @@ ${deliveryCost > 0 ? `*Envío: ${formatPrice(deliveryCost)}*` : ""}
           <button
             type="button"
             onClick={handleSubmit}
-            className="w-full bg-tupedido-blue text-white font-bold py-3 md:py-4 rounded-md hover:opacity-90 transition-opacity text-base md:text-lg"
+            className="w-full bg-[#1e4b8e] text-white font-bold py-3 md:py-4 rounded-md hover:opacity-90 transition-opacity text-base md:text-lg"
           >
             Pedir por WhatsApp
           </button>
