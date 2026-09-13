@@ -18,6 +18,7 @@ import { useStore, type Producto } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
 import { PreviewButton } from "@/components/backoffice/preview-button"
 import { SignOutButton } from "@/components/backoffice/sign-out-button"
+import { uploadBackofficeImage } from "@/lib/backoffice-image-upload"
 
 interface Subcategoria {
   id: string
@@ -281,41 +282,9 @@ export default function ProductosPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Error",
-        description: "Por favor selecciona un archivo de imagen válido",
-        variant: "destructive",
-      })
-      return
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "Error",
-        description: "La imagen no debe superar los 5MB",
-        variant: "destructive",
-      })
-      return
-    }
-
     setUploadingImage(true)
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-
-      const response = await fetch("/api/backoffice/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error("Error al subir la imagen")
-      }
-
-      const { url } = await response.json()
+      const url = await uploadBackofficeImage(file)
       setNuevoProducto({ ...nuevoProducto, imagen: url })
 
       toast({
@@ -326,7 +295,7 @@ export default function ProductosPage() {
       console.error("[v0] Error uploading image:", error)
       toast({
         title: "Error",
-        description: "No se pudo cargar la imagen",
+        description: error instanceof Error ? error.message : "No se pudo cargar la imagen",
         variant: "destructive",
       })
     } finally {
@@ -537,7 +506,7 @@ export default function ProductosPage() {
             className={`block h-0.5 w-4 bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2 w-6" : ""}`}
           ></span>
         </button>
-        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0 border-b border-gray-100">
+        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
           <div className="w-full sm:w-auto flex justify-end sm:justify-start">
             <Image
               src="/images/logoautogestiva.png"

@@ -354,7 +354,7 @@ export default function CuponesDescuentoPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-[#1e4b8e] text-white">
+      <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-[#1e4b8e] text-white">
         <div className="flex items-center">
           <Link href="/backoffice" className="text-white hover:text-gray-200 mr-4">
             <ArrowLeft className="h-5 w-5" />

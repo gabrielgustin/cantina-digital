@@ -14,6 +14,7 @@ import { PreviewButton } from "@/components/backoffice/preview-button"
 import { SignOutButton } from "@/components/backoffice/sign-out-button"
 import { useStore } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
+import { uploadBackofficeImage } from "@/lib/backoffice-image-upload"
 
 export default function InformacionNegocioPage() {
   const { informacionNegocio, setInformacionNegocio } = useStore()
@@ -78,40 +79,10 @@ export default function InformacionNegocioPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Error",
-        description: "Por favor selecciona un archivo de imagen válido",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "Error",
-        description: "La imagen no debe superar los 5MB",
-        variant: "destructive",
-      })
-      return
-    }
-
     setUploading(true)
 
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-
-      const uploadResponse = await fetch("/api/backoffice/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!uploadResponse.ok) {
-        throw new Error("Error al subir la imagen")
-      }
-
-      const { url } = await uploadResponse.json()
+      const url = await uploadBackofficeImage(file)
       console.log("[v0] Logo uploaded to Blob:", url)
 
       const configResponse = await fetch("/api/backoffice/site-config", {
@@ -139,7 +110,7 @@ export default function InformacionNegocioPage() {
       console.error("[v0] Error uploading logo:", error)
       toast({
         title: "Error",
-        description: "No se pudo subir el logo. Intenta nuevamente.",
+        description: error instanceof Error ? error.message : "No se pudo subir el logo. Intenta nuevamente.",
         variant: "destructive",
       })
     } finally {
@@ -270,7 +241,7 @@ export default function InformacionNegocioPage() {
   return (
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <Link href="/backoffice" className="text-white hover:text-gray-200">
               <ArrowLeft className="h-5 w-5" />
