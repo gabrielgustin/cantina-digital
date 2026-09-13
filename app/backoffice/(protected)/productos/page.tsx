@@ -492,7 +492,7 @@ export default function ProductosPage() {
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white relative">
         <button
-          className="md:hidden absolute top-1/2 -translate-y-1/2 left-4 z-40 bg-[#1e4b8e] text-white p-3 rounded-md flex flex-col gap-1.5 items-start"
+          className="md:hidden absolute top-4 sm:top-1/2 sm:-translate-y-1/2 left-4 z-40 bg-[#1e4b8e] text-white p-3 rounded-md flex flex-col gap-1.5 items-start"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Abrir menú de navegación"
         >

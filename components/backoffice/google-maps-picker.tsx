@@ -78,27 +78,27 @@ export function GoogleMapsPicker({ value, onChange, placeholder = "Buscar direcc
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Input
-            type="text"
-            placeholder={placeholder}
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onBlur={() => {
-              if (searchValue !== value) {
-                onChange(searchValue)
-              }
-            }}
-            className="bg-gray-50 border-0 pr-10"
-          />
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        </div>
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder={placeholder}
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          onBlur={() => {
+            if (searchValue !== value) {
+              onChange(searchValue)
+            }
+          }}
+          className="bg-gray-50 border-0 pr-10"
+        />
+        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      </div>
 
+      <div className="flex flex-col sm:flex-row gap-2">
         <Button
           type="button"
           variant="outline"
-          className="bg-green-600 text-white hover:bg-green-700 hover:text-white whitespace-nowrap"
+          className="bg-green-600 text-white hover:bg-green-700 hover:text-white w-full sm:w-auto"
           onClick={getCurrentLocation}
           disabled={isLoadingLocation}
         >
@@ -113,7 +113,7 @@ export function GoogleMapsPicker({ value, onChange, placeholder = "Buscar direcc
         <Button
           type="button"
           variant="outline"
-          className="bg-[#1e4b8e] text-white hover:bg-[#163a70] hover:text-white whitespace-nowrap"
+          className="bg-[#1e4b8e] text-white hover:bg-[#163a70] hover:text-white w-full sm:w-auto"
           onClick={openGoogleMaps}
         >
           <MapPin className="h-4 w-4 mr-2" />
