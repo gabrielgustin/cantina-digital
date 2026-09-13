@@ -2,10 +2,11 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
 import { NextResponse } from "next/server"
 import { requireBackofficeSession } from "@/lib/backoffice-auth"
 
-// Issues short-lived tokens that let the browser upload the raw image file
+// Issues short-lived tokens that let the browser upload the image file
 // directly to Blob storage, bypassing the request body size limit that
-// Vercel enforces on Route Handlers (~4.5MB). The optimized/final version is
-// produced afterwards by /api/backoffice/optimize-image.
+// Vercel enforces on Route Handlers (~4.5MB). Resizing/WebP conversion
+// happens client-side (see lib/backoffice-image-upload.ts) before this is
+// called, so the file received here is typically already optimized.
 export async function POST(request: Request) {
   if (!(await requireBackofficeSession())) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 })
@@ -25,9 +26,7 @@ export async function POST(request: Request) {
         }
       },
       onUploadCompleted: async ({ blob }) => {
-        // This raw upload is temporary: /api/backoffice/optimize-image
-        // replaces it with an optimized WebP copy and deletes it.
-        console.log("[v0] Raw image uploaded to Blob:", blob.url)
+        console.log("[v0] Image uploaded to Blob:", blob.url)
       },
     })
 

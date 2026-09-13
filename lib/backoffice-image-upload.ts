@@ -1,22 +1,95 @@
 import { upload } from "@vercel/blob/client"
 
-// Generous ceiling for the raw file. It is no longer bound by Vercel's
-// ~4.5MB Route Handler request body limit because the file now goes
-// directly from the browser to Blob storage instead of through our server.
+// Generous ceiling for the raw file selected by the user, before any
+// client-side resizing happens.
 const MAX_FILE_SIZE = 20 * 1024 * 1024
+
+// Uniform canvas size every uploaded image is normalized into. Images are
+// never cropped: they are scaled to fit inside this square and centered on a
+// neutral background, so every product/category/banner image renders
+// consistently.
+const CANVAS_SIZE = 1200
+const CANVAS_BACKGROUND = "#ffffff"
+const WEBP_QUALITY = 0.82
 
 export class ImageUploadError extends Error {}
 
+function toBaseFileName(fileName: string) {
+  const withoutExtension = fileName.replace(/\.[^/.]+$/, "")
+  const safeName = withoutExtension.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase() || "imagen"
+  return safeName
+}
+
 /**
- * Uploads an image for the backoffice in two steps:
- * 1. The raw file is sent directly from the browser to Blob storage using a
- *    short-lived client token, bypassing the request body size limit that
- *    Vercel enforces on Route Handlers/Server Actions (~4.5MB). This is what
- *    started failing once server-side optimization was introduced and phone
- *    photos (commonly 4-8MB) began exceeding that limit.
- * 2. The server is asked to resize/convert that upload to WebP by receiving
- *    only its URL (a tiny JSON payload) and fetching the bytes itself, which
- *    has no such body-size restriction.
+ * Resizes/converts an image entirely in the browser using <canvas>, instead
+ * of sending it to a server route backed by a native image library (sharp).
+ * Native image libraries ship platform-specific binaries that can fail to
+ * load depending on the deployment target (architecture, libc, bundler),
+ * which is what caused uploads to fail with "Error al optimizar la imagen".
+ * The Canvas API has no native dependency: it runs the same way in every
+ * browser, so this step can never fail for that reason.
+ */
+async function resizeToWebp(file: File): Promise<Blob | null> {
+  if (typeof document === "undefined") return null
+
+  const objectUrl = URL.createObjectURL(file)
+
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = () => reject(new Error("No se pudo leer la imagen"))
+      img.src = objectUrl
+    })
+
+    const canvas = document.createElement("canvas")
+    canvas.width = CANVAS_SIZE
+    canvas.height = CANVAS_SIZE
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return null
+
+    ctx.fillStyle = CANVAS_BACKGROUND
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
+
+    // Scale to fit inside the square (never crop) and center it, mirroring
+    // the "contain" behavior of the previous server-side implementation.
+    const scale = Math.min(CANVAS_SIZE / image.width, CANVAS_SIZE / image.height)
+    const drawWidth = image.width * scale
+    const drawHeight = image.height * scale
+    const offsetX = (CANVAS_SIZE - drawWidth) / 2
+    const offsetY = (CANVAS_SIZE - drawHeight) / 2
+
+    ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight)
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((result) => resolve(result), "image/webp", WEBP_QUALITY)
+    })
+
+    // Some browsers (older Safari) ignore the requested type and return null
+    // or fall back silently; treat anything that isn't a real webp blob as
+    // "couldn't optimize" so the caller can fall back to the original file.
+    if (!blob || blob.type !== "image/webp") return null
+
+    return blob
+  } catch {
+    // Covers formats the browser's <img> can't decode (e.g. HEIC in
+    // Chrome/Firefox) — fall back to uploading the original file untouched.
+    return null
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
+/**
+ * Uploads an image for the backoffice directly from the browser to Blob
+ * storage using a short-lived client token, bypassing the request body size
+ * limit that Vercel enforces on Route Handlers/Server Actions (~4.5MB).
+ *
+ * The image is resized and converted to WebP client-side first (see
+ * resizeToWebp above). If that isn't possible for any reason, the original
+ * file is uploaded as-is rather than failing the whole upload — some image
+ * is always better than a hard error for the user.
  */
 export async function uploadBackofficeImage(file: File): Promise<string> {
   if (!file.type.startsWith("image/")) {
@@ -27,27 +100,21 @@ export async function uploadBackofficeImage(file: File): Promise<string> {
     throw new ImageUploadError("La imagen no debe superar los 20MB")
   }
 
-  const rawBlob = await upload(file.name, file, {
-    access: "public",
-    handleUploadUrl: "/api/backoffice/upload/client-token",
-  })
+  const optimized = await resizeToWebp(file)
 
-  const optimizeResponse = await fetch("/api/backoffice/optimize-image", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url: rawBlob.url }),
-  })
+  const uploadFile = optimized ?? file
+  const fileName = optimized ? `${toBaseFileName(file.name)}.webp` : file.name
 
-  if (!optimizeResponse.ok) {
-    const errorData = await optimizeResponse.json().catch(() => ({}))
-    throw new ImageUploadError(errorData.error || "Error al optimizar la imagen")
+  try {
+    const blob = await upload(fileName, uploadFile, {
+      access: "public",
+      handleUploadUrl: "/api/backoffice/upload/client-token",
+      contentType: uploadFile.type || file.type,
+    })
+
+    return blob.url
+  } catch (error) {
+    console.error("[v0] Error uploading image to Blob:", error)
+    throw new ImageUploadError("No se pudo subir la imagen. Intenta nuevamente.")
   }
-
-  const data = await optimizeResponse.json()
-
-  if (!data.url) {
-    throw new ImageUploadError("No se recibió la URL de la imagen optimizada")
-  }
-
-  return data.url as string
 }

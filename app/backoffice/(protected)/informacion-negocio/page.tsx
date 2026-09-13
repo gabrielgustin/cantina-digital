@@ -15,6 +15,7 @@ import { SignOutButton } from "@/components/backoffice/sign-out-button"
 import { useStore } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
 import { uploadBackofficeImage } from "@/lib/backoffice-image-upload"
+import { authClient } from "@/lib/auth-client"
 
 export default function InformacionNegocioPage() {
   const { informacionNegocio, setInformacionNegocio } = useStore()
@@ -34,6 +35,18 @@ export default function InformacionNegocioPage() {
   const [saving, setSaving] = useState(false)
   const [logoPreview, setLogoPreview] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const { data: session } = authClient.useSession()
+
+  const [emailForm, setEmailForm] = useState({ nuevoEmail: "", contrasenaActual: "" })
+  const [savingEmail, setSavingEmail] = useState(false)
+
+  const [passwordForm, setPasswordForm] = useState({
+    contrasenaActual: "",
+    nuevaContrasena: "",
+    confirmarContrasena: "",
+  })
+  const [savingPassword, setSavingPassword] = useState(false)
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -148,6 +161,150 @@ export default function InformacionNegocioPage() {
         description: "No se pudo eliminar el logo",
         variant: "destructive",
       })
+    }
+  }
+
+  const handleChangeEmail = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const nuevoEmail = emailForm.nuevoEmail.trim().toLowerCase()
+    const currentEmail = session?.user?.email
+
+    if (!nuevoEmail || !emailForm.contrasenaActual) {
+      toast({
+        title: "Error",
+        description: "Completa el nuevo email y tu contraseña actual",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (currentEmail && nuevoEmail === currentEmail.toLowerCase()) {
+      toast({
+        title: "Error",
+        description: "El nuevo email debe ser distinto al actual",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!currentEmail) {
+      toast({
+        title: "Error",
+        description: "No se pudo verificar tu sesión. Recarga la página e intenta nuevamente.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSavingEmail(true)
+    try {
+      // Re-verify the current password before changing the login email,
+      // since Better Auth's changeEmail endpoint trusts the active session
+      // alone and does not ask for a password by itself.
+      const { error: reauthError } = await authClient.signIn.email({
+        email: currentEmail,
+        password: emailForm.contrasenaActual,
+      })
+
+      if (reauthError) {
+        toast({
+          title: "Error",
+          description: "La contraseña actual es incorrecta",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const { error: changeError } = await authClient.changeEmail({ newEmail: nuevoEmail })
+
+      if (changeError) {
+        toast({
+          title: "Error",
+          description: changeError.message || "No se pudo actualizar el email",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setEmailForm({ nuevoEmail: "", contrasenaActual: "" })
+      toast({
+        title: "Email actualizado",
+        description: "Tu email de inicio de sesión ha sido actualizado correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error changing email:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el email. Intenta nuevamente.",
+        variant: "destructive",
+      })
+    } finally {
+      setSavingEmail(false)
+    }
+  }
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!passwordForm.contrasenaActual || !passwordForm.nuevaContrasena || !passwordForm.confirmarContrasena) {
+      toast({
+        title: "Error",
+        description: "Completa todos los campos de contraseña",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (passwordForm.nuevaContrasena.length < 8) {
+      toast({
+        title: "Error",
+        description: "La nueva contraseña debe tener al menos 8 caracteres",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (passwordForm.nuevaContrasena !== passwordForm.confirmarContrasena) {
+      toast({
+        title: "Error",
+        description: "Las contraseñas nuevas no coinciden",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSavingPassword(true)
+    try {
+      const { error } = await authClient.changePassword({
+        currentPassword: passwordForm.contrasenaActual,
+        newPassword: passwordForm.nuevaContrasena,
+        revokeOtherSessions: true,
+      })
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "La contraseña actual es incorrecta",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setPasswordForm({ contrasenaActual: "", nuevaContrasena: "", confirmarContrasena: "" })
+      toast({
+        title: "Contraseña actualizada",
+        description: "Tu contraseña ha sido actualizada correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error changing password:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la contraseña. Intenta nuevamente.",
+        variant: "destructive",
+      })
+    } finally {
+      setSavingPassword(false)
     }
   }
 
@@ -389,6 +546,113 @@ export default function InformacionNegocioPage() {
                 />
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="pt-8 mt-8 border-t border-gray-100">
+          <h2 className="text-lg font-medium text-gray-800 mb-1">Credenciales de acceso</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Actualiza el email y la contraseña que usas para ingresar al backoffice.
+          </p>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <form onSubmit={handleChangeEmail} className="space-y-4 rounded-lg bg-gray-50 p-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-800">Cambiar email de acceso</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Email actual: <span className="font-medium">{session?.user?.email || "..."}</span>
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Nuevo email</label>
+                <Input
+                  type="email"
+                  autoComplete="email"
+                  placeholder="nuevo@email.com"
+                  value={emailForm.nuevoEmail}
+                  onChange={(e) => setEmailForm({ ...emailForm, nuevoEmail: e.target.value })}
+                  className="bg-white border-0"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Contraseña actual</label>
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  value={emailForm.contrasenaActual}
+                  onChange={(e) => setEmailForm({ ...emailForm, contrasenaActual: e.target.value })}
+                  className="bg-white border-0"
+                />
+              </div>
+
+              <Button type="submit" className="bg-[#1e4b8e] hover:bg-[#163a70]" disabled={savingEmail}>
+                {savingEmail ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Actualizando...
+                  </>
+                ) : (
+                  "Actualizar email"
+                )}
+              </Button>
+            </form>
+
+            <form onSubmit={handleChangePassword} className="space-y-4 rounded-lg bg-gray-50 p-4">
+              <div>
+                <h3 className="text-sm font-medium text-gray-800">Cambiar contraseña</h3>
+                <p className="text-xs text-gray-500 mt-1">Debe tener al menos 8 caracteres.</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Contraseña actual</label>
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  value={passwordForm.contrasenaActual}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, contrasenaActual: e.target.value })}
+                  className="bg-white border-0"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Nueva contraseña</label>
+                <Input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  value={passwordForm.nuevaContrasena}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, nuevaContrasena: e.target.value })}
+                  className="bg-white border-0"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Confirmar nueva contraseña</label>
+                <Input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  value={passwordForm.confirmarContrasena}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirmarContrasena: e.target.value })}
+                  className="bg-white border-0"
+                />
+              </div>
+
+              <Button type="submit" className="bg-[#1e4b8e] hover:bg-[#163a70]" disabled={savingPassword}>
+                {savingPassword ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Actualizando...
+                  </>
+                ) : (
+                  "Actualizar contraseña"
+                )}
+              </Button>
+            </form>
           </div>
         </div>
 
