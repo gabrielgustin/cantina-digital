@@ -605,18 +605,6 @@ export default function ProductosPage() {
                         className="bg-gray-50 border-0 h-10"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-sm font-medium text-gray-700">Descuento (%)</Label>
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        value={nuevoProducto.descuento || ""}
-                        onChange={(e) =>
-                          setNuevoProducto({ ...nuevoProducto, descuento: Number(e.target.value) || 0 })
-                        }
-                        className="bg-gray-50 border-0 h-10"
-                      />
-                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
