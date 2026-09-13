@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { PreviewButton } from "@/components/backoffice/preview-button"
+import { SignOutButton } from "@/components/backoffice/sign-out-button"
 
 export default function BannerPromocionalPage() {
   const router = useRouter()
@@ -94,7 +95,7 @@ export default function BannerPromocionalPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-[#1e4b8e] text-white">
+      <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white">
         <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <Link href="/backoffice">
@@ -103,6 +104,10 @@ export default function BannerPromocionalPage() {
               </Button>
             </Link>
             <h1 className="text-xl font-semibold">Banner Promocional</h1>
+          </div>
+          <div className="flex items-center gap-1">
+            <PreviewButton />
+            <SignOutButton />
           </div>
         </div>
       </header>

@@ -6,6 +6,8 @@ import { ArrowLeft, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useStore } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
+import { PreviewButton } from "@/components/backoffice/preview-button"
+import { SignOutButton } from "@/components/backoffice/sign-out-button"
 
 export default function CodigoQRPage() {
   const { informacionNegocio } = useStore()
@@ -25,11 +27,17 @@ export default function CodigoQRPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="flex items-center px-6 py-4 border-b border-gray-100 bg-[#1e4b8e] text-white">
-        <Link href="/backoffice" className="text-white hover:text-gray-200 mr-4">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="text-xl font-medium text-white">Código QR</h1>
+      <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-[#1e4b8e] text-white">
+        <div className="flex items-center">
+          <Link href="/backoffice" className="text-white hover:text-gray-200 mr-4">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <h1 className="text-xl font-medium text-white">Código QR</h1>
+        </div>
+        <div className="flex items-center gap-1">
+          <PreviewButton />
+          <SignOutButton />
+        </div>
       </header>
 
       {/* Content */}

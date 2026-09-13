@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { PreviewButton } from "@/components/backoffice/preview-button"
+import { SignOutButton } from "@/components/backoffice/sign-out-button"
 import {
   ArrowLeft,
   Home,
@@ -140,7 +142,7 @@ export default function ColoresAppPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-[#1e4b8e] text-white">
+      <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white">
         <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <Link href="/backoffice">
@@ -149,6 +151,10 @@ export default function ColoresAppPage() {
               </Button>
             </Link>
             <h1 className="text-xl font-semibold">Personalización de Colores</h1>
+          </div>
+          <div className="flex items-center gap-1">
+            <PreviewButton />
+            <SignOutButton />
           </div>
         </div>
       </header>

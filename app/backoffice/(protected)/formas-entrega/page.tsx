@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { PreviewButton } from "@/components/backoffice/preview-button"
+import { SignOutButton } from "@/components/backoffice/sign-out-button"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -254,14 +255,17 @@ export default function FormasEntregaPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-[#1e4b8e] text-white">
+      <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-[#1e4b8e] text-white">
         <div className="flex items-center">
           <Link href="/backoffice" className="text-white hover:text-gray-200 mr-4">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <h1 className="text-xl font-medium text-white">Formas de entrega</h1>
         </div>
-        <PreviewButton />
+        <div className="flex items-center gap-1">
+          <PreviewButton />
+          <SignOutButton />
+        </div>
       </header>
 
       <div className="max-w-3xl mx-auto p-6">

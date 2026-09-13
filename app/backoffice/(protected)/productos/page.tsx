@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useStore, type Producto } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
 import { PreviewButton } from "@/components/backoffice/preview-button"
+import { SignOutButton } from "@/components/backoffice/sign-out-button"
 
 interface Subcategoria {
   id: string
@@ -467,7 +468,7 @@ export default function ProductosPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-[#1e4b8e] text-white relative">
+      <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white relative">
         <button
           className="md:hidden absolute top-1/2 -translate-y-1/2 left-4 z-40 bg-[#1e4b8e] text-white p-3 rounded-md flex flex-col gap-1.5 items-start"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -494,8 +495,9 @@ export default function ProductosPage() {
               priority
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
             <PreviewButton />
+            <SignOutButton />
           </div>
         </div>
       </header>
