@@ -30,8 +30,7 @@ export default function BannerPromocionalPage() {
       if (!response.ok) throw new Error("Error al cargar configuración")
 
       const config = await response.json()
-      console.log("[v0] Banner config received:", config)
-      console.log("[v0] banner_enabled value:", config.banner_enabled, "type:", typeof config.banner_enabled)
+
       
       setBannerText(config.banner_text || "")
       const enabledValue = config.banner_enabled === "true" || config.banner_enabled === true
@@ -61,13 +60,7 @@ export default function BannerPromocionalPage() {
 
     setSaving(true)
     try {
-      console.log("[v0] Current bannerEnabled state:", bannerEnabled, "type:", typeof bannerEnabled)
-      console.log("[v0] Saving banner config:", {
-        banner_text: bannerText,
-        banner_enabled: bannerEnabled,
-        banner_enabled_string: String(bannerEnabled)
-      })
-      
+
       const response = await fetch("/api/backoffice/site-config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -142,11 +135,7 @@ export default function BannerPromocionalPage() {
                       type="checkbox"
                       id="enabled"
                       checked={bannerEnabled}
-                      onChange={(e) => {
-                        console.log("[v0] Checkbox changed to:", e.target.checked)
-                        setBannerEnabled(e.target.checked)
-                        console.log("[v0] State will update to:", e.target.checked)
-                      }}
+                    onChange={(e) => setBannerEnabled(e.target.checked)}
                       className="h-4 w-4"
                     />
                     <label htmlFor="enabled" className="text-sm font-medium">
@@ -164,9 +153,9 @@ export default function BannerPromocionalPage() {
                       <div className="bg-white rounded-lg overflow-hidden shadow-lg">
                         
                         <iframe
-                          src="/"
+                          src="/?previewBanner=true"
                           className="w-full h-[600px] border-0"
-                          title="Vista previa de la aplicación"
+                          title="Vista previa ilustrativa de la aplicación"
                         />
                       </div>
                     </div>

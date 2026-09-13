@@ -9,7 +9,13 @@ import { getValidImageUrl } from "@/utils/image-utils"
 
 export const revalidate = 0 // Always fetch fresh data - no cache
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams?: Promise<{ previewBanner?: string }>
+}) {
+  const { previewBanner } = (await searchParams) ?? {}
+  const isPreview = previewBanner === "true"
   const [categories, promoBanner, businessOpen] = await Promise.all([
     getCategories(),
     getPromoBannerConfig(),
@@ -31,7 +37,15 @@ export default async function Home() {
     <main className="flex flex-col h-screen">
       <div className="flex-shrink-0">
         <ServerHeader />
-        {!businessOpen ? (
+        {isPreview ? (
+          promoBanner.text ? (
+            <PromoBanner text={promoBanner.text} />
+          ) : (
+            <div className="bg-[#1e4b8e] px-4 py-3 text-center text-sm font-semibold text-white">
+              Vista previa del banner promocional
+            </div>
+          )
+        ) : !businessOpen ? (
           <ClosedBanner />
         ) : (
           promoBanner.enabled && promoBanner.text && <PromoBanner text={promoBanner.text} />
