@@ -4,7 +4,6 @@ import Link from "next/link"
 import { Grid3X3, Briefcase, Info, Clock, CreditCard, Ticket, QrCode, Package, ExternalLink } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import PreviewButton from "@/components/backoffice/preview-button"
-import { SignOutButton } from "@/components/backoffice/sign-out-button"
 
 export default function BackofficeHome() {
   return (
@@ -24,7 +23,6 @@ export default function BackofficeHome() {
           </div>
           <div className="flex items-center gap-4">
             <PreviewButton />
-            <SignOutButton />
           </div>
         </div>
       </header>
