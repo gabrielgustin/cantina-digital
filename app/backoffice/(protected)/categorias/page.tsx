@@ -86,10 +86,6 @@ export default function CategoriasPage() {
       setRecienAgregadaId(nueva.id)
       setTimeout(() => setRecienAgregadaId(null), 500)
 
-      toast({
-        title: "Subcategoría agregada",
-        description: "La subcategoría ha sido agregada correctamente",
-      })
     } catch (error) {
       console.error("[v0] Error:", error)
       toast({
