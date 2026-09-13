@@ -53,6 +53,9 @@ export default function ProductosPage() {
   const [editandoSubcategoria, setEditandoSubcategoria] = useState<string | null>(null)
   const [nuevoNombreSubcategoria, setNuevoNombreSubcategoria] = useState("")
   const [subcategoriaAEliminar, setSubcategoriaAEliminar] = useState<string | null>(null)
+  const [creandoSubcategoriaEnSelector, setCreandoSubcategoriaEnSelector] = useState(false)
+  const [nombreNuevaSubcategoriaSelector, setNombreNuevaSubcategoriaSelector] = useState("")
+  const [creandoSubcategoriaSelectorSaving, setCreandoSubcategoriaSelectorSaving] = useState(false)
 
   useEffect(() => {
     const handleResize = () => {
@@ -388,6 +391,56 @@ export default function ProductosPage() {
     }
   }
 
+  const crearSubcategoriaDesdeSelector = async () => {
+    if (nombreNuevaSubcategoriaSelector.trim() === "" || !nuevoProducto.categoria) {
+      toast({
+        title: "Error",
+        description: "El nombre de la subcategoría es obligatorio",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setCreandoSubcategoriaSelectorSaving(true)
+    try {
+      const response = await fetch("/api/backoffice/subcategorias", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: nombreNuevaSubcategoriaSelector,
+          categoria_id: nuevoProducto.categoria,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Error al crear subcategoría")
+      }
+
+      const nuevaSubcategoria = await response.json()
+      await fetchSubcategorias()
+      setNuevoProducto((prev) => ({ ...prev, subcategoria: nuevaSubcategoria.id }))
+      setNombreNuevaSubcategoriaSelector("")
+      setCreandoSubcategoriaEnSelector(false)
+
+      const categoriaNombre = categorias.find((cat) => cat.id === nuevoProducto.categoria)?.nombre
+      toast({
+        title: "Subcategoría agregada",
+        description: categoriaNombre
+          ? `Se vinculó automáticamente a "${categoriaNombre}"`
+          : "La subcategoría ha sido agregada correctamente",
+      })
+    } catch (error) {
+      console.error("[v0] Error:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo agregar la subcategoría",
+        variant: "destructive",
+      })
+    } finally {
+      setCreandoSubcategoriaSelectorSaving(false)
+    }
+  }
+
   const editarSubcategoria = async (subcategoriaId: string) => {
     if (nuevoNombreSubcategoria.trim() === "") {
       toast({
@@ -643,9 +696,11 @@ export default function ProductosPage() {
                       <Label className="text-sm font-medium text-gray-700">Categoría</Label>
                       <Select
                         value={nuevoProducto.categoria}
-                        onValueChange={(value) =>
+                        onValueChange={(value) => {
                           setNuevoProducto({ ...nuevoProducto, categoria: value, subcategoria: "" })
-                        }
+                          setCreandoSubcategoriaEnSelector(false)
+                          setNombreNuevaSubcategoriaSelector("")
+                        }}
                       >
                         <SelectTrigger className="bg-gray-50 border-0 h-10">
                           <SelectValue placeholder="Selecciona" />
@@ -663,7 +718,13 @@ export default function ProductosPage() {
                       <Label className="text-sm font-medium text-gray-700">Subcategoría</Label>
                       <Select
                         value={nuevoProducto.subcategoria || ""}
-                        onValueChange={(value) => setNuevoProducto({ ...nuevoProducto, subcategoria: value })}
+                        onValueChange={(value) => {
+                          if (value === "__nueva__") {
+                            setCreandoSubcategoriaEnSelector(true)
+                            return
+                          }
+                          setNuevoProducto({ ...nuevoProducto, subcategoria: value })
+                        }}
                         disabled={!nuevoProducto.categoria}
                       >
                         <SelectTrigger className="bg-gray-50 border-0 h-10">
@@ -677,8 +738,49 @@ export default function ProductosPage() {
                                 {sub.nombre}
                               </SelectItem>
                             ))}
+                          <SelectItem value="__nueva__" className="text-[#1e4b8e] font-medium">
+                            + Agregar subcategoría
+                          </SelectItem>
                         </SelectContent>
                       </Select>
+                      {creandoSubcategoriaEnSelector && (
+                        <div className="flex items-center gap-2 pt-1">
+                          <Input
+                            autoFocus
+                            placeholder="Nombre de la subcategoría"
+                            value={nombreNuevaSubcategoriaSelector}
+                            onChange={(e) => setNombreNuevaSubcategoriaSelector(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault()
+                                crearSubcategoriaDesdeSelector()
+                              }
+                            }}
+                            className="bg-gray-50 border-0 h-9 text-sm"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="h-9 bg-[#1e4b8e] hover:bg-[#163a70]"
+                            disabled={creandoSubcategoriaSelectorSaving}
+                            onClick={crearSubcategoriaDesdeSelector}
+                          >
+                            {creandoSubcategoriaSelectorSaving ? "..." : "Agregar"}
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-9"
+                            onClick={() => {
+                              setCreandoSubcategoriaEnSelector(false)
+                              setNombreNuevaSubcategoriaSelector("")
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
