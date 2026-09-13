@@ -42,6 +42,15 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  user: {
+    changeEmail: {
+      enabled: true,
+      // The backoffice admin account never goes through an email verification
+      // flow, so this lets the owner update their login email directly from
+      // the settings page instead of requiring an email-sending provider.
+      updateEmailWithoutVerification: true,
+    },
+  },
   ...(process.env.NODE_ENV === "development"
     ? {
         advanced: {
