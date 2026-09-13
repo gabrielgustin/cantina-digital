@@ -144,7 +144,7 @@ export default function FinalizarPedidoPage() {
   const deliveryCost = deliveryMethod?.cost || 0
   const finalTotal = subtotalAfterDiscount + deliveryCost
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name || !phone || !deliveryMethod || !paymentMethod) {
       toast.error("Por favor complete todos los campos obligatorios")
       return
@@ -155,6 +155,17 @@ export default function FinalizarPedidoPage() {
 
     if (isDelivery && !address.trim()) {
       toast.error("Por favor ingrese una dirección de entrega")
+      return
+    }
+
+    const stockResponse = await fetch("/api/orders/stock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    })
+    if (!stockResponse.ok) {
+      const stockError = await stockResponse.json().catch(() => null)
+      toast.error(stockError?.error || "No hay stock suficiente para completar el pedido")
       return
     }
 

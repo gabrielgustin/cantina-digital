@@ -20,6 +20,7 @@ export default function ProductDetailPage({
   const { productId, categoryId } = use(params)
 
   const [product, setProduct] = useState<Product | null>(null)
+  const [selectedVariantId, setSelectedVariantId] = useState("")
   const [category, setCategory] = useState<Category | null>(null)
   const [loading, setLoading] = useState(true)
   const [configLoaded, setConfigLoaded] = useState(false)
@@ -96,17 +97,26 @@ export default function ProductDetailPage({
     }
 
     if (product) {
+      const selectedVariant = product.variants?.find((variant) => variant.id === selectedVariantId)
+      const currentPrice = selectedVariant?.price ?? product.price
+      const availableStock = selectedVariant?.stock ?? product.stock ?? 0
+
+      if (product.variants?.length && !selectedVariant) return
+      if (quantity > availableStock) return
+
       addItem({
-        id: product.id,
-        title: product.title,
-        price: product.price,
+        id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
+        title: selectedVariant ? `${product.title} - ${selectedVariant.name}` : product.title,
+        price: currentPrice,
         quantity: quantity,
         imageUrl: product.image_url || "",
+        productId: product.id,
+        variantId: selectedVariant?.id,
       })
 
       router.push("/carrito")
     }
-  }, [product, quantity, addItem, router, canOrder])
+  }, [product, quantity, selectedVariantId, addItem, router, canOrder])
 
   const categoryImageUrl = useMemo(() => category?.image_url || "/placeholder.svg", [category?.image_url])
 
@@ -115,10 +125,14 @@ export default function ProductDetailPage({
     return getValidImageUrl(product.image_url || "", categoryId + " " + product.subtitle, product.title)
   }, [product, categoryId])
 
-  const totalPrice = useMemo(() => {
-    if (!product) return 0
-    return product.price * quantity
-  }, [product, quantity])
+  const selectedVariant = useMemo(
+    () => product?.variants?.find((variant) => variant.id === selectedVariantId),
+    [product, selectedVariantId],
+  )
+
+  const displayPrice = selectedVariant?.price ?? product?.price ?? 0
+
+  const totalPrice = useMemo(() => displayPrice * quantity, [displayPrice, quantity])
 
   if (loading || !configLoaded) {
     return (
@@ -197,16 +211,38 @@ export default function ProductDetailPage({
                   className="text-2xl md:text-[28px] font-bold product-title-font"
                   style={{ color: "var(--color-primario)" }}
                 >
-                  {formatPrice(product.price * (1 - product.discount / 100))}
+                  {formatPrice(displayPrice * (1 - product.discount / 100))}
                 </p>
-                <p className="text-base text-gray-400 line-through">{formatPrice(product.price)}</p>
+                <p className="text-base text-gray-400 line-through">{formatPrice(displayPrice)}</p>
               </div>
             ) : (
               <p className="text-2xl md:text-[28px] font-bold" style={{ color: "var(--color-primario)" }}>
-                {formatPrice(product.price)}
+                {formatPrice(displayPrice)}
               </p>
             )}
           </div>
+
+          {product.variants && product.variants.length > 0 && (
+            <div className="py-5 border-b border-gray-100">
+              <label htmlFor="product-variant" className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2 block">
+                Elegí una variante
+              </label>
+              <select
+                id="product-variant"
+                value={selectedVariantId}
+                onChange={(event) => setSelectedVariantId(event.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 p-3.5 text-[15px] text-gray-900 focus:outline-none focus:ring-2"
+                style={{ "--tw-ring-color": "var(--color-primario)" } as React.CSSProperties}
+              >
+                <option value="">Seleccioná una variante</option>
+                {product.variants.map((variant) => (
+                  <option key={variant.id} value={variant.id} disabled={variant.stock <= 0}>
+                    {variant.name} — {formatPrice(variant.price)}{variant.stock <= 0 ? " (Agotado)" : ` · ${variant.stock} disponibles`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {product.description && (
             <div className="py-5 border-b border-gray-100">

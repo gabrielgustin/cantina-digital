@@ -38,6 +38,15 @@ export interface Product {
   is_promo: boolean
   created_at?: string
   discount?: number // Percentage discount (e.g., 30 for 30% off)
+  stock?: number
+  variants?: ProductVariant[]
+}
+
+export interface ProductVariant {
+  id: string
+  name: string
+  price: number
+  stock: number
 }
 
 export interface SiteConfig {
@@ -306,13 +315,20 @@ export async function getProductById(id: string): Promise<Product | null> {
     const result = await client`
       SELECT id, categoria as category_id, nombre as title, '' as subtitle,
              imagen as image_url, descripcion as description,
-             precio, descuento, false as is_promo, created_at
+             precio, descuento, stock, false as is_promo, created_at
       FROM productos
       WHERE id = ${id} AND visible = true
       LIMIT 1
     `
     const product = result[0] as any
     if (!product) return null
+
+    const variants = await client`
+      SELECT id, nombre as name, precio as price, stock
+      FROM producto_variantes
+      WHERE producto_id = ${id}
+      ORDER BY created_at ASC
+    `
 
     return {
       id: product.id,
@@ -325,6 +341,13 @@ export async function getProductById(id: string): Promise<Product | null> {
       ),
       description: product.description || "",
       price: parsePrice(product.precio),
+      stock: Number(product.stock || 0),
+      variants: (variants as any[]).map((variant) => ({
+        id: variant.id,
+        name: variant.name,
+        price: parsePrice(variant.price),
+        stock: Number(variant.stock || 0),
+      })),
       is_promo: product.is_promo || false,
       created_at: product.created_at,
       discount: product.descuento ? Number(product.descuento) : undefined,
