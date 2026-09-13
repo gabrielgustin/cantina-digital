@@ -17,13 +17,14 @@ export default async function BackofficeSignInPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center rounded-xl bg-[#1e4b8e] px-6 py-4">
+          <div className="inline-flex items-center justify-center rounded-xl px-6 py-4">
             <Image
               src="/images/logoautogestiva.png"
               alt="Autogestiva"
               width={500}
               height={100}
               className="h-12 w-auto"
+              style={{ filter: "brightness(0) saturate(100%) invert(24%) sepia(35%) saturate(1768%) hue-rotate(176deg) brightness(89%) contrast(93%)" }}
               priority
             />
           </div>
