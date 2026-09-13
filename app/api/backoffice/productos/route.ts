@@ -25,6 +25,7 @@ export async function GET() {
       visible: prod.visible !== false,
       subcategoria: prod.subcategoria || "",
       descuento: prod.descuento || 0,
+      stock: Number(prod.stock || 0),
     }))
 
     console.log("[v0] Mapped products:", mapped)
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { nombre, descripcion, precio, imagen, categoria, subcategoria, descuento } = body
+    const { nombre, descripcion, precio, imagen, categoria, subcategoria, descuento, stock = 0, variantes = [] } = body
 
     if (!nombre || nombre.trim() === "") {
       return NextResponse.json({ error: "El nombre es obligatorio" }, { status: 400 })
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     const id = crypto.randomUUID()
 
     const result = await sql`
-      INSERT INTO productos (id, nombre, descripcion, precio, imagen, categoria, visible, subcategoria, descuento)
+      INSERT INTO productos (id, nombre, descripcion, precio, imagen, categoria, visible, subcategoria, descuento, stock)
       VALUES (
         ${id},
         ${nombre}, 
@@ -69,10 +70,19 @@ export async function POST(request: Request) {
         ${categoria},
         ${true},
         ${subcategoria || ""},
-        ${descuento || 0}
+        ${descuento || 0},
+        ${Number.isInteger(Number(stock)) && Number(stock) >= 0 ? Number(stock) : 0}
       )
       RETURNING *
     `
+
+    for (const variante of Array.isArray(variantes) ? variantes : []) {
+      if (!variante?.nombre || Number(variante.precio) < 0 || Number(variante.stock) < 0) continue
+      await sql`
+        INSERT INTO producto_variantes (producto_id, nombre, precio, stock)
+        VALUES (${id}, ${variante.nombre.trim()}, ${Number(variante.precio)}, ${Number(variante.stock)})
+      `
+    }
 
     const mapped = {
       id: result[0].id,

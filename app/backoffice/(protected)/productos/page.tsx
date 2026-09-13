@@ -28,6 +28,7 @@ export default function ProductosPage() {
   const { productos, categorias, refetchProductos, loading } = useStore()
   const { toast } = useToast()
   const [isOpen, setIsOpen] = useState(false)
+  const [variantes, setVariantes] = useState<Array<{ nombre: string; precio: string; stock: string }>>([])
   const [nuevoProducto, setNuevoProducto] = useState<Omit<Producto, "id">>({
     nombre: "",
     descripcion: "",
@@ -115,7 +116,10 @@ export default function ProductosPage() {
       const response = await fetch(`/api/backoffice/productos/${productoEditando}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevoProducto),
+        body: JSON.stringify({
+          ...nuevoProducto,
+          variantes,
+        }),
       })
 
       if (!response.ok) {
@@ -168,7 +172,10 @@ export default function ProductosPage() {
       const response = await fetch("/api/backoffice/productos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevoProducto),
+        body: JSON.stringify({
+          ...nuevoProducto,
+          variantes,
+        }),
       })
 
       if (!response.ok) {
@@ -551,6 +558,7 @@ export default function ProductosPage() {
                       subcategoria: "",
                       descuento: 0,
                     })
+                    setVariantes([])
                     setModoEdicion(false)
                     setProductoEditando(null)
                     setIsOpen(true)
@@ -605,6 +613,27 @@ export default function ProductosPage() {
                         className="bg-gray-50 border-0 h-10"
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700">Variantes e inventario</Label>
+                        <p className="text-xs text-gray-500">Opcional: nombre, precio y stock de cada variante.</p>
+                      </div>
+                      <Button type="button" variant="outline" size="sm" onClick={() => setVariantes([...variantes, { nombre: "", precio: nuevoProducto.precio || "0", stock: "0" }])}>
+                        <Plus className="mr-1 h-3 w-3" /> Agregar
+                      </Button>
+                    </div>
+                    {variantes.map((variante, index) => (
+                      <div key={index} className="grid grid-cols-[1fr_85px_70px_auto] gap-2 items-end">
+                        <Input placeholder="Nombre" value={variante.nombre} onChange={(e) => setVariantes(variantes.map((v, i) => i === index ? { ...v, nombre: e.target.value } : v))} />
+                        <Input type="number" min="0" placeholder="Precio" value={variante.precio} onChange={(e) => setVariantes(variantes.map((v, i) => i === index ? { ...v, precio: e.target.value } : v))} />
+                        <Input type="number" min="0" placeholder="Stock" value={variante.stock} onChange={(e) => setVariantes(variantes.map((v, i) => i === index ? { ...v, stock: e.target.value } : v))} />
+                        <Button type="button" variant="ghost" size="icon" onClick={() => setVariantes(variantes.filter((_, i) => i !== index))} aria-label="Eliminar variante"><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                      </div>
+                    ))}
+                    {variantes.length === 0 && <p className="text-xs text-gray-500">Sin variantes: el producto usará su precio base.</p>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
