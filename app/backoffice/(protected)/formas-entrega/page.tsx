@@ -281,9 +281,6 @@ export default function FormasEntregaPage() {
                 <div className="flex items-center">
                   <Eye className="h-5 w-5 text-[#1e4b8e] mr-3" />
                   <span className="text-sm font-medium text-gray-700">{forma.nombre}</span>
-                  {forma.isRequired && (
-                    <span className="ml-2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">Obligatoria</span>
-                  )}
                   {forma.isNew && (
                     <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Nuevo</span>
                   )}
