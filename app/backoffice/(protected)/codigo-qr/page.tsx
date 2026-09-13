@@ -1,18 +1,15 @@
 "use client"
 
-import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useStore } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
 
 export default function CodigoQRPage() {
   const { informacionNegocio } = useStore()
   const { toast } = useToast()
-  const [activeTab, setActiveTab] = useState("tienda")
   const qrCodeUrl = "/qr-code.png"
 
   const tiendaUrl = informacionNegocio.linkTienda || "https://tupedido.app/mi-tienda"
@@ -41,52 +38,22 @@ export default function CodigoQRPage() {
           <h2 className="text-lg font-medium text-gray-800 mb-4">Código QR</h2>
           
 
-          <Tabs defaultValue="tienda" className="mb-6">
-            <TabsList className="grid grid-cols-2 bg-gray-50">
-              <TabsTrigger value="tienda" onClick={() => setActiveTab("tienda")}>
-                QR Tienda
-              </TabsTrigger>
-              <TabsTrigger value="menu" onClick={() => setActiveTab("menu")}>
-                QR Menú Digital
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="tienda" className="pt-6">
-              <div className="flex flex-col items-center">
-                <div className="border border-gray-200 p-4 rounded-lg mb-4">
-                  <Image
-                    src={qrCodeUrl || "/placeholder.svg"}
-                    alt="QR Code"
-                    width={200}
-                    height={200}
-                    className="mx-auto"
-                  />
-                </div>
-                
-                <Button variant="outline" className="flex items-center gap-2" onClick={handleDownload}>
-                  <Download className="h-4 w-4" />
-                  Descargar código QR
-                </Button>
-              </div>
-            </TabsContent>
-            <TabsContent value="menu" className="pt-6">
-              <div className="flex flex-col items-center">
-                <div className="border border-gray-200 p-4 rounded-lg mb-4">
-                  <Image
-                    src={qrCodeUrl || "/placeholder.svg"}
-                    alt="QR Code Menu"
-                    width={200}
-                    height={200}
-                    className="mx-auto"
-                  />
-                </div>
-                
-                <Button variant="outline" className="flex items-center gap-2" onClick={handleDownload}>
-                  <Download className="h-4 w-4" />
-                  Descargar código QR
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="pt-6 flex flex-col items-center">
+            <div className="border border-gray-200 p-4 rounded-lg mb-4">
+              <Image
+                src={qrCodeUrl || "/placeholder.svg"}
+                alt="Código QR de la tienda"
+                width={200}
+                height={200}
+                className="mx-auto"
+              />
+            </div>
+
+            <Button variant="outline" className="flex items-center gap-2" onClick={handleDownload}>
+              <Download className="h-4 w-4" />
+              Descargar código QR
+            </Button>
+          </div>
         </div>
       </div>
     </div>
