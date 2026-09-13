@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
 import { PreviewButton } from "@/components/backoffice/preview-button"
+import { SignOutButton } from "@/components/backoffice/sign-out-button"
 import { useToast } from "@/hooks/use-toast"
 import { TimePicker } from "@/components/backoffice/time-picker"
 
@@ -223,7 +224,7 @@ export default function HorariosAtencionPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-[#1e4b8e] text-white">
+      <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white">
         <div className="container mx-auto flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-4">
             <Link href="/backoffice" className="text-white hover:text-gray-200">
@@ -231,7 +232,10 @@ export default function HorariosAtencionPage() {
             </Link>
             <h1 className="text-xl font-medium text-white">Horarios de atención</h1>
           </div>
-          <PreviewButton />
+          <div className="flex items-center gap-1">
+            <PreviewButton />
+            <SignOutButton />
+          </div>
         </div>
       </header>
 

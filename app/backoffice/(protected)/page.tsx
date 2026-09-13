@@ -3,13 +3,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { Grid3X3, Briefcase, Info, Clock, CreditCard, Ticket, QrCode, Package, ExternalLink } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import PreviewButton from "@/components/backoffice/preview-button"
+import { PreviewButton } from "@/components/backoffice/preview-button"
+import { SignOutButton } from "@/components/backoffice/sign-out-button"
 
 export default function BackofficeHome() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-[#1e4b8e] text-white relative pb-6">
+      <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white relative pb-6">
         <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <div>
             <Image
@@ -21,8 +22,9 @@ export default function BackofficeHome() {
               priority
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
             <PreviewButton />
+            <SignOutButton />
           </div>
         </div>
       </header>

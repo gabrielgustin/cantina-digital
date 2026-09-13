@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { GoogleMapsPicker } from "@/components/backoffice/google-maps-picker"
 import { PreviewButton } from "@/components/backoffice/preview-button"
+import { SignOutButton } from "@/components/backoffice/sign-out-button"
 import { useStore } from "@/contexts/store-context"
 import { useToast } from "@/hooks/use-toast"
 
@@ -268,7 +269,7 @@ export default function InformacionNegocioPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="bg-[#1e4b8e] text-white">
+      <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white">
         <div className="container mx-auto flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-4">
             <Link href="/backoffice" className="text-white hover:text-gray-200">
@@ -276,7 +277,10 @@ export default function InformacionNegocioPage() {
             </Link>
             <h1 className="text-xl font-medium text-white">Información del negocio</h1>
           </div>
-          <PreviewButton />
+          <div className="flex items-center gap-1">
+            <PreviewButton />
+            <SignOutButton />
+          </div>
         </div>
       </header>
 

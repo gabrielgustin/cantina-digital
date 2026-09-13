@@ -12,7 +12,8 @@ export function PreviewButton() {
   return (
     <>
       <Button
-        className="md:bg-white md:hover:bg-gray-100 md:text-[#1e4b8e] bg-[#1e4b8e] hover:bg-[#163a70] text-white rounded-full md:static md:translate-x-0 md:translate-y-0 fixed bottom-6 right-6 z-50 md:w-auto md:h-auto w-14 h-14 md:flex md:items-center md:justify-center shadow-lg md:shadow-none"
+        variant="ghost"
+        className="text-white hover:bg-white/10 hover:text-white"
         aria-label="Ver tienda en modo cliente"
         onClick={() => setIsWindowOpen(true)}
       >
@@ -20,7 +21,7 @@ export function PreviewButton() {
           <ExternalLink className="h-4 w-4" />
           Ver tienda en modo cliente
         </span>
-        <ExternalLink className="md:hidden h-6 w-6" />
+        <ExternalLink className="md:hidden h-5 w-5" />
       </Button>
 
       <FloatingWindow url={storePreviewUrl} isOpen={isWindowOpen} onClose={() => setIsWindowOpen(false)} />
