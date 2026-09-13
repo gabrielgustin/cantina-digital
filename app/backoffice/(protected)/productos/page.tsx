@@ -537,7 +537,7 @@ export default function ProductosPage() {
             className={`block h-0.5 w-4 bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2 w-6" : ""}`}
           ></span>
         </button>
-        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0 border-b border-gray-100">
+        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
           <div className="w-full sm:w-auto flex justify-end sm:justify-start">
             <Image
               src="/images/logoautogestiva.png"
