@@ -26,7 +26,7 @@ export function SectionTitle({
 
   const productUrl = typeof window !== "undefined" ? `${window.location.origin}${pathname}` : ""
 
-  const paddingClass = variant === "compact" ? "py-1" : "py-1 pb-20 md:pb-24"
+  const paddingClass = variant === "compact" ? "py-1" : "pt-[14px] pb-20 md:pb-24"
 
   return (
     <>
