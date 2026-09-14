@@ -11,7 +11,7 @@ export async function GET() {
     console.log("[v0] Fetching products from database...")
     const products = await sql`
       SELECT * FROM productos 
-      ORDER BY created_at DESC
+      ORDER BY categoria ASC, orden ASC NULLS LAST, created_at ASC
     `
     console.log("[v0] Successfully fetched products:", products.length)
 
@@ -26,6 +26,7 @@ export async function GET() {
       subcategoria: prod.subcategoria || "",
       descuento: prod.descuento || 0,
       stock: Number(prod.stock || 0),
+      orden: prod.orden,
     }))
 
     console.log("[v0] Mapped products:", mapped)

@@ -36,6 +36,8 @@ export default function ProductDetailPage({
   const [observation, setObservation] = useState("")
   const [canOrder, setCanOrder] = useState(true)
   const [showClosedAlert, setShowClosedAlert] = useState(false)
+  const [showVariantAlert, setShowVariantAlert] = useState(false)
+  const [showStockAlert, setShowStockAlert] = useState(false)
 
   useEffect(() => {
     async function fetchData() {
@@ -99,10 +101,21 @@ export default function ProductDetailPage({
     if (product) {
       const selectedVariant = product.variants?.find((variant) => variant.id === selectedVariantId)
       const currentPrice = selectedVariant?.price ?? product.price
-      const availableStock = selectedVariant?.stock ?? product.stock ?? 0
 
-      if (product.variants?.length && !selectedVariant) return
-      if (quantity > availableStock) return
+      if (product.variants?.length && !selectedVariant) {
+        setShowVariantAlert(true)
+        setTimeout(() => setShowVariantAlert(false), 4000)
+        return
+      }
+
+      // El stock solo se controla a nivel de variante, ya que es el único valor
+      // que el negocio puede configurar desde el backoffice. El stock general del
+      // producto no es editable y por defecto es 0, por lo que no debe bloquear la compra.
+      if (selectedVariant && quantity > selectedVariant.stock) {
+        setShowStockAlert(true)
+        setTimeout(() => setShowStockAlert(false), 4000)
+        return
+      }
 
       addItem({
         id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
@@ -177,6 +190,18 @@ export default function ProductDetailPage({
             Lo sentimos, no podemos recibir pedidos en este momento. Por favor, intenta más tarde durante nuestro
             horario de atención.
           </p>
+        </div>
+      )}
+      {showVariantAlert && (
+        <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 mx-4 mt-4 rounded" role="alert">
+          <p className="font-bold">Elegí una variante</p>
+          <p className="text-sm">Seleccioná una variante antes de agregar el producto al carrito.</p>
+        </div>
+      )}
+      {showStockAlert && (
+        <div className="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 mx-4 mt-4 rounded" role="alert">
+          <p className="font-bold">Stock insuficiente</p>
+          <p className="text-sm">No hay suficiente stock disponible para la cantidad seleccionada.</p>
         </div>
       )}
       <div className="flex-1 bg-white overflow-y-auto pb-32 md:pb-36">
