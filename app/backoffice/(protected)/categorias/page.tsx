@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Home, Grid3X3, Briefcase, Plus, X, Trash2 } from "lucide-react"
+import { Home, Grid3X3, Briefcase, Plus, X, Trash2, ArrowUp, ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -19,9 +19,10 @@ import { SignOutButton } from "@/components/backoffice/sign-out-button"
 import { uploadBackofficeImage } from "@/lib/backoffice-image-upload"
 
 export default function CategoriasPage() {
-  const { categorias, productos, refetchCategorias, loading } = useStore()
+  const { categorias, setCategorias, productos, refetchCategorias, loading } = useStore()
   const { toast } = useToast()
   const [isOpen, setIsOpen] = useState(false)
+  const [reordenandoId, setReordenandoId] = useState<string | null>(null)
   const [nuevaCategoria, setNuevaCategoria] = useState<Omit<Categoria, "id">>({
     nombre: "",
     visible: true,
@@ -123,6 +124,40 @@ export default function CategoriasPage() {
         description: "No se pudo eliminar la subcategoría",
         variant: "destructive",
       })
+    }
+  }
+
+  const moverCategoria = async (categoriaId: string, direccion: "arriba" | "abajo") => {
+    const index = categorias.findIndex((cat) => cat.id === categoriaId)
+    const nuevoIndex = direccion === "arriba" ? index - 1 : index + 1
+
+    if (index === -1 || nuevoIndex < 0 || nuevoIndex >= categorias.length) return
+
+    const reordenadas = [...categorias]
+    const [movida] = reordenadas.splice(index, 1)
+    reordenadas.splice(nuevoIndex, 0, movida)
+
+    setReordenandoId(categoriaId)
+    setCategorias(reordenadas)
+
+    try {
+      const response = await fetch("/api/backoffice/categorias/reorder", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: reordenadas.map((cat) => cat.id) }),
+      })
+
+      if (!response.ok) throw new Error("Error al reordenar")
+    } catch (error) {
+      console.error("[v0] Error reordering categorias:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo reordenar la categoría",
+        variant: "destructive",
+      })
+      await refetchCategorias()
+    } finally {
+      setReordenandoId(null)
     }
   }
 
@@ -608,15 +643,41 @@ export default function CategoriasPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {categorias.map((categoria) => {
+              {categorias.map((categoria, index) => {
                 const subcategoriasCount = getSubcategoriasCountPorCategoria(categoria.id.toString())
 
                 return (
                   <Card
                     key={categoria.id}
-                    className="overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow transition-shadow"
+                    className="overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow transition-shadow relative"
                     onClick={() => editarCategoria(categoria.id.toString())}
                   >
+                    <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          moverCategoria(categoria.id.toString(), "arriba")
+                        }}
+                        disabled={index === 0 || reordenandoId !== null}
+                        aria-label="Mover categoría antes"
+                        className="bg-white/90 text-gray-700 rounded-md p-1.5 shadow-sm hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          moverCategoria(categoria.id.toString(), "abajo")
+                        }}
+                        disabled={index === categorias.length - 1 || reordenandoId !== null}
+                        aria-label="Mover categoría después"
+                        className="bg-white/90 text-gray-700 rounded-md p-1.5 shadow-sm hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </button>
+                    </div>
                     <div className="relative h-40 sm:h-48 overflow-hidden bg-gray-100">
                       <Image
                         src={categoria.imagen || "/placeholder.svg?height=400&width=400"}

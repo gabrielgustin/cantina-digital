@@ -9,6 +9,7 @@ export interface Categoria {
   nombre: string
   imagen: string
   visible: boolean
+  orden?: number
 }
 
 export interface Producto {
@@ -21,6 +22,7 @@ export interface Producto {
   visible: boolean
   subcategoria?: string
   descuento?: number // added descuento field for discount percentage
+  orden?: number
 }
 
 export interface MetodoPago {

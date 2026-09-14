@@ -11,7 +11,7 @@ export async function GET() {
     console.log("[v0] Fetching categories from database...")
     const categories = await sql`
       SELECT * FROM categorias 
-      ORDER BY created_at DESC
+      ORDER BY orden ASC NULLS LAST, created_at ASC
     `
     console.log("[v0] Successfully fetched categories:", categories.length)
 
@@ -20,6 +20,7 @@ export async function GET() {
       nombre: cat.nombre,
       imagen: cat.imagen,
       visible: cat.visible !== false,
+      orden: cat.orden,
     }))
 
     return NextResponse.json(mapped)

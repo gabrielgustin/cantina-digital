@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Home, Grid3X3, Briefcase, Plus, Trash2, X, Pencil } from "lucide-react"
+import { Home, Grid3X3, Briefcase, Plus, Trash2, X, Pencil, ArrowUp, ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -27,9 +27,10 @@ interface Subcategoria {
 }
 
 export default function ProductosPage() {
-  const { productos, categorias, refetchProductos, loading } = useStore()
+  const { productos, categorias, setProductos, refetchProductos, loading } = useStore()
   const { toast } = useToast()
   const [isOpen, setIsOpen] = useState(false)
+  const [reordenandoId, setReordenandoId] = useState<string | null>(null)
   const [variantes, setVariantes] = useState<Array<{ nombre: string; precio: string; stock: string }>>([])
   const [nuevoProducto, setNuevoProducto] = useState<Omit<Producto, "id">>({
     nombre: "",
@@ -303,6 +304,52 @@ export default function ProductosPage() {
     }
   }
 
+  const moverProducto = async (
+    categoriaId: string,
+    productosCategoria: Producto[],
+    productoId: number,
+    direccion: "arriba" | "abajo",
+  ) => {
+    const index = productosCategoria.findIndex((prod) => prod.id === productoId)
+    const nuevoIndex = direccion === "arriba" ? index - 1 : index + 1
+
+    if (index === -1 || nuevoIndex < 0 || nuevoIndex >= productosCategoria.length) return
+
+    const reordenados = [...productosCategoria]
+    const [movido] = reordenados.splice(index, 1)
+    reordenados.splice(nuevoIndex, 0, movido)
+
+    // Reemplazar únicamente las posiciones de esta categoría, en su nuevo orden,
+    // sin mover el resto de las categorías dentro de la lista general.
+    let cursor = 0
+    const nuevaLista = productos.map((prod) =>
+      prod.categoria === categoriaId ? reordenados[cursor++] : prod,
+    )
+
+    setReordenandoId(String(productoId))
+    setProductos(nuevaLista)
+
+    try {
+      const response = await fetch("/api/backoffice/productos/reorder", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoriaId, ids: reordenados.map((prod) => prod.id) }),
+      })
+
+      if (!response.ok) throw new Error("Error al reordenar")
+    } catch (error) {
+      console.error("[v0] Error reordering productos:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo reordenar el producto",
+        variant: "destructive",
+      })
+      await refetchProductos()
+    } finally {
+      setReordenandoId(null)
+    }
+  }
+
   const productosPorCategoria = productos.reduce(
     (acc, producto) => {
       const categoriaId = producto.categoria || "sin-categoria"
@@ -492,32 +539,32 @@ export default function ProductosPage() {
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white relative">
         <button
-          className="md:hidden absolute top-4 sm:top-1/2 sm:-translate-y-1/2 left-4 z-40 bg-[#1e4b8e] text-white p-3 rounded-md flex flex-col gap-1.5 items-start"
+          className="md:hidden absolute top-1/2 -translate-y-1/2 left-3 sm:left-4 z-40 bg-[#1e4b8e] text-white p-2 sm:p-3 rounded-md flex flex-col gap-1 sm:gap-1.5 items-start"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Abrir menú de navegación"
         >
           <span
-            className={`block h-0.5 w-6 bg-white transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2 w-6" : ""}`}
+            className={`block h-0.5 w-5 sm:w-6 bg-white transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-1.5 w-5 sm:w-6" : ""}`}
           ></span>
           <span
-            className={`block h-0.5 w-5 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
+            className={`block h-0.5 w-4 sm:w-5 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
           ></span>
           <span
-            className={`block h-0.5 w-4 bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2 w-6" : ""}`}
+            className={`block h-0.5 w-3 sm:w-4 bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-1.5 w-5 sm:w-6" : ""}`}
           ></span>
         </button>
-        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
-          <div className="w-full sm:w-auto flex justify-end sm:justify-start">
+        <div className="container mx-auto flex flex-row items-center justify-between gap-2 pl-14 pr-3 py-2 sm:gap-0 sm:px-6 sm:py-4 sm:pl-6">
+          <div className="flex min-w-0 items-center">
             <Image
               src="/images/logoautogestiva.png"
               alt="Autogestiva"
               width={500}
               height={100}
-              className="h-14 sm:h-20 w-auto"
+              className="h-9 w-auto sm:h-20"
               priority
             />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <PreviewButton />
             <SignOutButton />
           </div>
@@ -980,13 +1027,46 @@ export default function ProductosPage() {
                       )}
                     </div>
 
+                    {filtroSubcategoria !== "todos" && (
+                      <p className="text-xs text-gray-500 mb-3 -mt-1">
+                        El orden de los productos solo se puede editar con el filtro "Todos" seleccionado.
+                      </p>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                      {productosFiltrados.map((producto) => (
+                      {productosFiltrados.map((producto, prodIndex) => (
                         <Card
                           key={producto.id}
                           className="overflow-hidden cursor-pointer border-0 shadow-sm hover:shadow transition-shadow relative group"
                           onClick={() => editarProducto(producto.id)}
                         >
+                          {filtroSubcategoria === "todos" && categoriaId && (
+                            <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  moverProducto(categoriaId, productosCategoria, producto.id, "arriba")
+                                }}
+                                disabled={prodIndex === 0 || reordenandoId !== null}
+                                aria-label="Mover producto antes"
+                                className="bg-white/90 text-gray-700 rounded-md p-1.5 shadow-sm hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                              >
+                                <ArrowUp className="h-4 w-4" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  moverProducto(categoriaId, productosCategoria, producto.id, "abajo")
+                                }}
+                                disabled={prodIndex === productosFiltrados.length - 1 || reordenandoId !== null}
+                                aria-label="Mover producto después"
+                                className="bg-white/90 text-gray-700 rounded-md p-1.5 shadow-sm hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                              >
+                                <ArrowDown className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                           <Button
                             variant="destructive"
                             size="icon"

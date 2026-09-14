@@ -4,7 +4,6 @@ import { SectionTitle } from "@/components/section-title"
 import { ProductCard } from "@/components/product-card"
 import { BottomNav } from "@/components/bottom-nav"
 import { FiltersModal } from "@/components/filters-modal"
-import { Filter } from 'lucide-react'
 import { useState, type ReactNode } from "react"
 
 interface Product {
@@ -101,13 +100,6 @@ export function ProductsPageClient({
             ))}
           </div>
 
-          <button
-            onClick={() => setIsFiltersOpen(true)}
-            className="bg-tupedido-blue text-white px-4 py-2 rounded-md flex items-center gap-2 flex-shrink-0 font-medium text-sm"
-          >
-            <Filter className="w-4 h-4" />
-            Filtros
-          </button>
         </div>
       </div>
 

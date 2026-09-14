@@ -168,12 +168,13 @@ export async function getCategories(): Promise<Category[]> {
         '' as subtitle, 
         c.imagen as image_url, 
         c.created_at,
+        c.orden,
         MAX(p.descuento) as max_discount
       FROM categorias c
       LEFT JOIN productos p ON p.categoria = c.id AND p.visible = true AND p.descuento > 0
       WHERE c.visible = true
-      GROUP BY c.id, c.nombre, c.imagen, c.created_at
-      ORDER BY c.created_at ASC
+      GROUP BY c.id, c.nombre, c.imagen, c.created_at, c.orden
+      ORDER BY c.orden ASC NULLS LAST, c.created_at ASC
     `
     console.log("[v0] Categories fetched:", result.length)
 
@@ -239,7 +240,7 @@ export async function getProducts(): Promise<Product[]> {
              precio, descuento, false as is_promo, created_at
       FROM productos
       WHERE visible = true
-      ORDER BY created_at ASC
+      ORDER BY categoria ASC, orden ASC NULLS LAST, created_at ASC
     `
     console.log("[v0] Products fetched:", result.length)
 
@@ -281,7 +282,7 @@ export async function getProductsByCategory(categoryId: string): Promise<Product
       FROM productos p
       LEFT JOIN subcategorias s ON p.subcategoria = s.id
       WHERE p.categoria = ${categoryId} AND p.visible = true
-      ORDER BY p.created_at ASC
+      ORDER BY p.orden ASC NULLS LAST, p.created_at ASC
     `
     console.log("[v0] Products found:", result.length)
 
