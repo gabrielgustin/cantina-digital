@@ -5,11 +5,12 @@ import { upload } from "@vercel/blob/client"
 const MAX_FILE_SIZE = 20 * 1024 * 1024
 
 // Uniform canvas size every uploaded image is normalized into. Images are
-// never cropped: they are scaled to fit inside this square and centered on a
-// neutral background, so every product/category/banner image renders
-// consistently.
+// never cropped: they are scaled to fit inside this square and centered.
+// The canvas is left transparent (WebP supports alpha) so logos and other
+// images with transparent backgrounds keep it — a filled background would
+// bake a solid square behind them wherever they're displayed on a colored
+// surface (e.g. the store logo in the header).
 const CANVAS_SIZE = 1200
-const CANVAS_BACKGROUND = "#ffffff"
 const WEBP_QUALITY = 0.82
 
 export class ImageUploadError extends Error {}
@@ -49,8 +50,8 @@ async function resizeToWebp(file: File): Promise<Blob | null> {
     const ctx = canvas.getContext("2d")
     if (!ctx) return null
 
-    ctx.fillStyle = CANVAS_BACKGROUND
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
+    // A freshly created canvas is already fully transparent, so no fill is
+    // needed here — that's what keeps source transparency intact.
 
     // Scale to fit inside the square (never crop) and center it, mirroring
     // the "contain" behavior of the previous server-side implementation.

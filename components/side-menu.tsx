@@ -78,13 +78,13 @@ export const SideMenu = memo(function SideMenu({ isOpen, onClose }: SideMenuProp
               href="https://www.autogestiva.com.ar"
               target="_blank"
               rel="noopener noreferrer"
-              className="block bg-tupedido-blue p-6 text-center text-white font-bold hover:opacity-90 transition-opacity border-t border-blue-600"
+              className="block bg-tupedido-blue p-6 text-center text-white font-bold hover:opacity-90 transition-opacity"
             >
               ¡Quiero una tienda así para mi negocio!
             </a>
             <button
               onClick={onClose}
-              className="w-full bg-white py-4 text-tupedido-blue font-bold hover:opacity-90 transition-opacity"
+              className="w-full h-[50px] bg-white flex items-center justify-center text-tupedido-blue font-bold hover:opacity-90 transition-opacity"
             >
               Cerrar
             </button>

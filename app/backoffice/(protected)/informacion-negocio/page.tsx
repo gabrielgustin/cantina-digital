@@ -423,12 +423,12 @@ export default function InformacionNegocioPage() {
 
             {logoPreview && (
               <div className="mt-3 relative inline-block">
-                <div className="relative w-48 h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                <div className="relative w-48 h-48">
                   <Image
                     src={logoPreview || "/placeholder.svg"}
                     alt="Logo preview"
                     fill
-                    className="object-contain p-4"
+                    className="object-contain"
                     onError={() => {
                       setLogoPreview("")
                       toast({
