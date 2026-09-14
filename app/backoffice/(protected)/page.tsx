@@ -10,7 +10,7 @@ export default function BackofficeHome() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white relative pb-6">
+      <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white relative">
         <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <div>
             <Image
