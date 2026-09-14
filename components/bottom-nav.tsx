@@ -22,16 +22,16 @@ export function BottomNav() {
       {/* Espacio transparente de 15px */}
       <div className="h-[15px] bg-transparent"></div>
 
-      {/* Navbar amarillo */}
-      <nav className="bg-tupedido-yellow py-3 px-5 shadow-lg">
+      {/* Navbar azul */}
+      <nav className="bg-tupedido-blue py-3 px-5 shadow-lg">
         <div className="flex justify-around items-center max-w-md mx-auto">
-          <Link href="/" className="flex flex-col items-center">
-            <Home size={26} strokeWidth={2.5} className="text-tupedido-blue" />
+          <Link href="/" className="flex flex-col items-center text-white">
+            <Home size={26} strokeWidth={2.5} className="text-white" />
           </Link>
-          <Link href="/carrito" className="flex flex-col items-center relative">
-            <ShoppingCart size={26} strokeWidth={2.5} className="text-tupedido-blue" />
+          <Link href="/carrito" className="flex flex-col items-center relative text-white">
+            <ShoppingCart size={26} strokeWidth={2.5} className="text-white" />
             {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-tupedido-blue text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-white text-tupedido-blue text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                 {itemCount}
               </span>
             )}
