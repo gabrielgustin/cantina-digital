@@ -84,7 +84,7 @@ export const SideMenu = memo(function SideMenu({ isOpen, onClose }: SideMenuProp
             </a>
             <button
               onClick={onClose}
-              className="w-full bg-white pt-[9px] pb-4 text-tupedido-blue font-bold hover:opacity-90 transition-opacity"
+              className="w-full h-24 bg-white flex items-center justify-center text-tupedido-blue font-bold hover:opacity-90 transition-opacity"
             >
               Cerrar
             </button>
