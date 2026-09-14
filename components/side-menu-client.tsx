@@ -148,7 +148,7 @@ export const SideMenuClient = memo(function SideMenuClient({
                 href={autogestivaUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block bg-tupedido-blue p-6 text-center text-white font-bold hover:opacity-90 transition-opacity border-t border-blue-600"
+                className="block bg-tupedido-blue p-6 text-center text-white font-bold hover:opacity-90 transition-opacity"
               >
                 ¡Quiero una tienda así para mi negocio!
               </a>
