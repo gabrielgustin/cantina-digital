@@ -11,18 +11,18 @@ export default function BackofficeHome() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white relative">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <div>
+        <div className="container mx-auto flex items-center justify-between gap-2 px-4 py-3 md:px-6 md:py-4">
+          <div className="min-w-0">
             <Image
               src="/images/logoautogestiva.png"
               alt="Autogestiva"
               width={500}
               height={100}
-              className="h-20 w-auto"
+              className="h-10 w-auto md:h-20"
               priority
             />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <PreviewButton />
             <SignOutButton />
           </div>
