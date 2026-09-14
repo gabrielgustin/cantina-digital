@@ -13,19 +13,15 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Cantidad inválida" }, { status: 400 })
       }
 
+      // El stock solo se gestiona a nivel de variante, ya que es el único valor
+      // editable desde el backoffice. El stock general del producto no es
+      // administrable (por defecto es 0), por lo que no debe descontarse ni
+      // bloquear el pedido cuando el producto no tiene variantes.
       if (item.variantId) {
         const updated = await sql`
           UPDATE producto_variantes
           SET stock = stock - ${quantity}
           WHERE id = ${item.variantId} AND stock >= ${quantity}
-          RETURNING id
-        `
-        if (!updated.length) return NextResponse.json({ error: `Stock insuficiente para ${item.title}` }, { status: 409 })
-      } else {
-        const updated = await sql`
-          UPDATE productos
-          SET stock = stock - ${quantity}
-          WHERE id = ${item.productId} AND stock >= ${quantity}
           RETURNING id
         `
         if (!updated.length) return NextResponse.json({ error: `Stock insuficiente para ${item.title}` }, { status: 409 })

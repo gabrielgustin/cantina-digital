@@ -5,7 +5,6 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CartProvider } from "@/context/cart-context"
 import { ViewCartButton } from "@/components/view-cart-button"
-import { CartInitializer } from "@/components/cart-initializer"
 import { Toaster } from "@/components/ui/toaster"
 import { getSiteColors } from "@/lib/db"
 
@@ -48,7 +47,6 @@ export default async function RootLayout({
       <body className={`${inter.className} ${anton.variable} ${openSans.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <CartProvider>
-            <CartInitializer />
             <div className="flex flex-col min-h-screen">
               {children}
               <ViewCartButton />
