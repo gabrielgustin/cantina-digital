@@ -15,6 +15,9 @@ export const ViewCartButton = memo(function ViewCartButton() {
   // Determinar si estamos en la página de detalle de producto
   const isProductDetailPage = pathname.includes("/productos/") && pathname.split("/").length > 3
 
+  // El backoffice tiene su propia UI y no debe mostrar el botón de carrito de la tienda
+  const isBackofficePage = pathname.startsWith("/backoffice")
+
   const calculateTotal = useMemo(() => {
     return items.reduce((total, item) => total + item.price * item.quantity, 0)
   }, [items])
@@ -47,8 +50,10 @@ export const ViewCartButton = memo(function ViewCartButton() {
   // Si no hay items o no está animando, no renderizar nada
   if (!isAnimating) return null
 
-  // Si estamos en la página de carrito, en la página de detalle de producto, o en la página de finalizar pedido, no mostrar el botón
-  if (pathname === "/carrito" || pathname === "/finalizar-pedido" || isProductDetailPage) return null
+  // Si estamos en la página de carrito, en la página de detalle de producto, en la página de finalizar pedido,
+  // o en cualquier página del backoffice, no mostrar el botón
+  if (pathname === "/carrito" || pathname === "/finalizar-pedido" || isProductDetailPage || isBackofficePage)
+    return null
 
   return (
     <div
