@@ -20,7 +20,7 @@ export function SignOutButton() {
   return (
     <Button
       variant="ghost"
-      className="text-white hover:bg-white/10 hover:text-white"
+      className="px-2 text-white hover:bg-white/10 hover:text-white md:px-4"
       onClick={handleSignOut}
       disabled={isLoading}
       aria-label="Cerrar sesión"

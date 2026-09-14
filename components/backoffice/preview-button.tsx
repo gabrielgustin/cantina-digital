@@ -13,7 +13,7 @@ export function PreviewButton() {
     <>
       <Button
         variant="ghost"
-        className="text-white hover:bg-white/10 hover:text-white"
+        className="px-2 text-white hover:bg-white/10 hover:text-white md:px-4"
         aria-label="Ver tienda en modo cliente"
         onClick={() => setIsWindowOpen(true)}
       >

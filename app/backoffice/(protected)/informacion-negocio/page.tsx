@@ -398,14 +398,14 @@ export default function InformacionNegocioPage() {
   return (
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/backoffice" className="text-white hover:text-gray-200">
+        <div className="container mx-auto flex items-center justify-between gap-2 px-4 py-3 md:px-6 md:py-4">
+          <div className="flex min-w-0 items-center gap-2 md:gap-4">
+            <Link href="/backoffice" className="shrink-0 text-white hover:text-gray-200">
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-xl font-medium text-white">Información del negocio</h1>
+            <h1 className="truncate text-base font-medium text-white md:text-xl">Información del negocio</h1>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <PreviewButton />
             <SignOutButton />
           </div>
