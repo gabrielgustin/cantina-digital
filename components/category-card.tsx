@@ -19,7 +19,7 @@ export const CategoryCard = memo(function CategoryCard({ id, title, subtitle, im
 
   return (
     <Link href={`/productos/${id}`}>
-      <div className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-3 md:mb-4 flex items-center justify-between gap-3 hover:shadow-lg transition-shadow duration-300 border border-gray-100 min-h-[140px] md:min-h-[180px]">
+      <div className="bg-white rounded-lg shadow-md py-6 px-[5px] md:py-8 md:px-[5px] mb-3 md:mb-4 flex items-center justify-between gap-3 hover:shadow-lg transition-shadow duration-300 border border-gray-100 min-h-[140px] md:min-h-[180px]">
         <div className="flex items-center flex-1 min-w-0">
           <div className="w-24 h-24 md:w-36 md:h-36 relative mr-4 md:mr-6 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
             <Image
