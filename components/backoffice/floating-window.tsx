@@ -32,7 +32,7 @@ export default function FloatingWindow({ url, isOpen, onClose }: FloatingWindowP
           aria-label="Cerrar vista previa"
           className="absolute top-0 right-14 md:right-[4.5rem] h-16 md:h-20 z-10 flex items-center"
         >
-          <span className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/90 text-gray-700 shadow-md hover:bg-white hover:text-gray-900 transition-colors">
+          <span className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 mb-[10px] rounded-full bg-white/90 text-gray-700 shadow-md hover:bg-white hover:text-gray-900 transition-colors">
             <X size={18} strokeWidth={2.5} className="md:w-5 md:h-5" />
           </span>
         </button>
