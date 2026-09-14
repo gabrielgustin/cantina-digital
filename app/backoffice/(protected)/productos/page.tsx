@@ -539,32 +539,32 @@ export default function ProductosPage() {
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-50 bg-[#1e4b8e] text-white relative">
         <button
-          className="md:hidden absolute top-4 sm:top-1/2 sm:-translate-y-1/2 left-4 z-40 bg-[#1e4b8e] text-white p-3 rounded-md flex flex-col gap-1.5 items-start"
+          className="md:hidden absolute top-1/2 -translate-y-1/2 left-3 sm:left-4 z-40 bg-[#1e4b8e] text-white p-2 sm:p-3 rounded-md flex flex-col gap-1 sm:gap-1.5 items-start"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Abrir menú de navegación"
         >
           <span
-            className={`block h-0.5 w-6 bg-white transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2 w-6" : ""}`}
+            className={`block h-0.5 w-5 sm:w-6 bg-white transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-1.5 w-5 sm:w-6" : ""}`}
           ></span>
           <span
-            className={`block h-0.5 w-5 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
+            className={`block h-0.5 w-4 sm:w-5 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}
           ></span>
           <span
-            className={`block h-0.5 w-4 bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2 w-6" : ""}`}
+            className={`block h-0.5 w-3 sm:w-4 bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-1.5 w-5 sm:w-6" : ""}`}
           ></span>
         </button>
-        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
-          <div className="w-full sm:w-auto flex justify-end sm:justify-start">
+        <div className="container mx-auto flex flex-row items-center justify-between gap-2 pl-14 pr-3 py-2 sm:gap-0 sm:px-6 sm:py-4 sm:pl-6">
+          <div className="flex min-w-0 items-center">
             <Image
               src="/images/logoautogestiva.png"
               alt="Autogestiva"
               width={500}
               height={100}
-              className="h-14 sm:h-20 w-auto"
+              className="h-9 w-auto sm:h-20"
               priority
             />
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <PreviewButton />
             <SignOutButton />
           </div>
