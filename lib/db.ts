@@ -1,4 +1,11 @@
 import { neon } from "@neondatabase/serverless"
+import { unstable_cache } from "next/cache"
+
+const PUBLIC_CACHE_SECONDS = 60
+
+function cachedPublic<T>(key: string[], fn: () => Promise<T>) {
+  return unstable_cache(fn, key, { revalidate: PUBLIC_CACHE_SECONDS })()
+}
 
 let sql: ReturnType<typeof neon> | null = null
 
@@ -75,7 +82,7 @@ export interface BusinessHours {
   updated_at?: string
 }
 
-export async function getSiteColors(): Promise<Record<string, string>> {
+async function getSiteColorsUncached(): Promise<Record<string, string>> {
   try {
     const client = getSql()
     if (!client) {
@@ -378,7 +385,7 @@ export async function getSiteConfig(key: string): Promise<string | null> {
   }
 }
 
-export async function getAllSiteConfigOptimized(): Promise<Record<string, string>> {
+async function getAllSiteConfigOptimizedUncached(): Promise<Record<string, string>> {
   try {
     const client = getSql()
     if (!client) {
@@ -425,7 +432,7 @@ export async function getAllSiteConfig(): Promise<Record<string, string>> {
   }
 }
 
-export async function getPromoBannerConfig(): Promise<{ text: string | null; enabled: boolean }> {
+async function getPromoBannerConfigUncached(): Promise<{ text: string | null; enabled: boolean }> {
   try {
     const client = getSql()
     if (!client) {
@@ -489,7 +496,7 @@ export async function getSubcategoriesByCategory(categoryId: string): Promise<Su
   }
 }
 
-export async function isBusinessOpen(): Promise<boolean> {
+async function isBusinessOpenUncached(): Promise<boolean> {
   try {
     const client = getSql()
     if (!client) {
@@ -671,4 +678,20 @@ export async function canOrderWhenClosed(): Promise<boolean> {
     console.error("[v0] Error checking canOrderWhenClosed:", error)
     return false
   }
+}
+
+export function getSiteColors() {
+  return cachedPublic(["site-colors"], getSiteColorsUncached)
+}
+
+export function getAllSiteConfigOptimized() {
+  return cachedPublic(["site-config-public"], getAllSiteConfigOptimizedUncached)
+}
+
+export function getPromoBannerConfig() {
+  return cachedPublic(["promo-banner-config"], getPromoBannerConfigUncached)
+}
+
+export function isBusinessOpen() {
+  return cachedPublic(["business-open"], isBusinessOpenUncached)
 }

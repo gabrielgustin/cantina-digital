@@ -2,7 +2,7 @@ import { ProductsPageClient } from "@/components/products-page-client"
 import { ServerHeader } from "@/components/server-header"
 import { getProductsByCategory, getCategoryById, getSubcategoriesByCategory } from "@/lib/db"
 
-export const revalidate = 10 // Revalidate every 10 seconds
+export const revalidate = 60 // Catalog data does not need second-level freshness
 
 export default async function ProductsPage({
   params,
