@@ -7,7 +7,7 @@ import { ClosedBanner } from "@/components/closed-banner"
 import { getCategories, getPromoBannerConfig, isBusinessOpen } from "@/lib/db"
 import { getValidImageUrl } from "@/utils/image-utils"
 
-export const revalidate = 0 // Always fetch fresh data - no cache
+export const revalidate = 60 // Public catalog/config data can be briefly cached
 
 export default async function Home({
   searchParams,

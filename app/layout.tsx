@@ -12,8 +12,6 @@ const inter = Inter({ subsets: ["latin"] })
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton" })
 const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans" })
 
-export const revalidate = 0
-
 export const metadata: Metadata = {
   title: "Autogestiva Cantina Digital",
   description: "Tu tienda de relojes y accesorios",
