@@ -227,7 +227,7 @@ export default function ProductDetailPage({
 
         <div className="px-5 md:px-6 max-w-sm mx-auto w-full">
           <div className="pt-5 pb-5 border-b border-gray-100">
-            <h1 className="text-2xl md:text-[26px] font-semibold text-gray-900 mb-2 product-title-font leading-tight text-pretty">
+            <h1 className="text-base font-semibold tracking-wide text-gray-900 mb-2">
               {product.title}
             </h1>
             {product.discount && product.discount > 0 ? (
